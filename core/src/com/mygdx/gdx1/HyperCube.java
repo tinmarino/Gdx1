@@ -20,6 +20,7 @@ import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
 import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 
 public class HyperCube implements Screen {
@@ -36,23 +37,46 @@ public class HyperCube implements Screen {
 	// CUbe info
     private double vertices[][];  					// vertex coords in 4-space
 	private byte edges[][];       					// "from" and "to" vertex indices
-	private ArrayList<int[]> faces = new ArrayList<int[]>(); 						// refernces to 4 vertices index
-    private double m1[][] = new double[4][4];		// Used for rot4
-    private double m2[][] = new double[4][4];
-    private double rot4[][] = new double[4][4];  	// rotation matrix
-    private double vel[][] = new double[4][4];  	// Velocity, applyed at each cycle. 
-    private double newROT[][] = new double[4][4];	// rot4 saver 
+ 	// refernces to 4 vertices index
+	private ArrayList<int[]> faces1 = new ArrayList<int[]>();
+	private ArrayList<int[]> faces2 = new ArrayList<int[]>();
     private double ROT4[][] = {	{1, 0, 0, 0},
 								{0, 1, 0, 0},
 								{0, 0, 1, 0},
 								{0, 0, 0, 1}
 							};
-    private double holdROT[][];
+	private double[][] vel = ROT4;
 
-	// Cube param
-	private final double velmax = .03;  			// max velocity, radians per cycle
-    private final double velinc = .006; 			// velocity increment, radians
-    double getSpeed() { return  0.1;}
+	private static double e = 0.000005f;
+	private static double e1 = Math.sin(e);
+	private static double e2 = Math.cos(e);
+	private static double rotX[][] = {
+		{     e2,    -e1,  	   0,  	   0},
+		{     e1,     e2,      0,  	   0},
+		{      0,      0,      1,  	   0},
+		{  	   0,      0,	   0,  	   1},
+	};
+	private static double rotY[][] = {
+		{      1,      0,  	   0,  	   0},
+		{      0,     e2,    -e1,  	   0},
+		{      0,     e1,     e2,  	   0},
+		{  	   0,      0,	   0,  	   1},
+	};
+	private static double rotZ[][] = {
+		{      1,      0,  	   0,  	   0},
+		{      0,      1,      0,  	   0},
+		{      0,      0,     e2,  	 -e1},
+		{  	   0,      0,	  e1,  	  e2},
+	};
+	private static double rotW[][] = {
+		{     e2,      0,  	   0,  	 -e1},
+		{      0,      1,      0,  	   0},
+		{      0,      0,      1,  	   0},
+		{  	  e1,      0,	   0,  	  e2},
+	};
+    double getSpeed() { return  10;}
+	Color faceColor1 = new Color(0, 0, 1, 0.15f);
+	Color faceColor2 = new Color(0, 1, 0, 0.15f);
 
 
 
@@ -94,6 +118,9 @@ public class HyperCube implements Screen {
 		modelBatch.begin(cam);
 		modelBatch.render(instance, environment);
 		modelBatch.end();
+
+		// Debug
+		// Gdx.app.log("TIN ", "rot" + ROT4[0][0]+","+ROT4[0][1]+","+ROT4[0][2]+","+ROT4[0][3]+",");
 	}
 
 	@Override
@@ -114,15 +141,15 @@ public class HyperCube implements Screen {
 			double p1[] = rotateVertex(vertices[edge[0]]);
 			double p2[] = rotateVertex(vertices[edge[1]]);
 			builder.line((float) p1[0], (float) p1[1],(float) p1[2],
-					(float) p2[0],(float) p2[1],(float) p2[3]);
+					(float) p2[0],(float) p2[1],(float) p2[2]);
 		}
 
 		// Faces
 		Material faceMaterial = new Material();
 		faceMaterial.set(new BlendingAttribute(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA));	
 		MeshPartBuilder builder2 = modelBuilder.part("face", GL20.GL_TRIANGLES, 3, faceMaterial);
-		builder2.setColor(new Color(0, 1, 0, 0.1f));
-		for (int[] face : faces){
+		builder2.setColor(faceColor1);
+		for (int[] face : faces1){
 			double p1[] = rotateVertex(vertices[face[0]]);
 			double p2[] = rotateVertex(vertices[face[1]]);
 			double p3[] = rotateVertex(vertices[face[2]]);
@@ -160,7 +187,7 @@ public class HyperCube implements Screen {
 
 
 	public double[] rotateVertex(double vertex[]){
- 		double res[] = {0, 0, 0, 0};
+ 		double res[] = new double[4];
 		for (int j=0; j < 4; j++) {
 			for (int k=0; k < 4; k++){
 				res[j] += (ROT4[j][k] * vertex[k]);
@@ -177,8 +204,15 @@ public class HyperCube implements Screen {
         edges = new byte[32][2];
 
         // create the vertices [1, 1, 1, -1]
+	
         for (i=0; i < 16; i++) {
-            for (j=0; j < 4; j++) vertices[i][j] = ((i >> (3-j)) & 1) - 0.5;
+            for (j=0; j < 4; j++){
+				vertices[i][j] = (((i >> (3-j)) & 1) - 0.5) * 2;
+			}
+			Gdx.app.log("Tin ", "vetex " + i + " : " + vertices[i][0]+","+vertices[i][1]+","+vertices[i][2]+","+vertices[i][3]+",");
+
+
+
         }
 
         // Create the edges
@@ -213,151 +247,46 @@ public class HyperCube implements Screen {
 				if (bol){
 					v_array[plane_index] = v;
 					plane_index++;
-					Gdx.app.log("TIN ", "YEAH YEAH " + v + ", " + plane_index + ": " + vertices[v][0]+","+vertices[v][1]+","+vertices[v][2]+","+vertices[v][3]);
 				}
 			}
-			Gdx.app.log("TIN ", "-------------------------------------------");
 			faces.add(v_array);
         }}}}
-		// All possiblility of 4 edges comming back
 	}
 
+	public int random(){
+		return rand.nextInt(10) - 5;
+	}
+
+	// Rot4 update 
 	public void updateRotationMatrix(){
-        double angl,sinangl,cosangl,d,dsq,max,veli,vmax;
-        int i,j,k,abi,abj;
+		ROT4 = mulMatrix(ROT4, vel, 1); 
+		vel = mulMatrix(vel, rotX, random());
+		vel = mulMatrix(vel, rotY, random());
+		vel = mulMatrix(vel, rotZ, random());
+		vel = mulMatrix(vel, rotW, random());
+	}
 
-        max = 0.0;
-        abi = 1;
-        abj = 2;
 
-        veli = velinc * getSpeed();
-        vmax = velmax * getSpeed();
 
-        // The velocity matrix represents the rotation that is to be performed every cycle.
-        // It is a 4x4 antisymmetric matrix, with a determinant of zero.
-        // We now change it by a small antisymmetric amount (which generally makes the determinant non-zero).
-        for (i=0; i < 3; i++) {
-            for (j=i+1; j < 4; j++) {
-                d = vel[i][j] + veli * (rand.nextDouble() - 0.5);
-                vel[i][j] = d;
-                vel[j][i] = -d;
-                dsq = d * d;
-                if (dsq > max) {      // hang onto the indices of the biggest element
-                    max = dsq;
-                    abi = i;
-                    abj = j;
-                }
-            }
-        }
+	public double[][] addMatrix(double[][] matrix1, double[][] matrix2, double scale){
+		double[][] res = new double[4][4];
+		for (int i = 0; i < 4; i++){
+		for (int j = 0; j < 4; j++){
+			res[i][j] = matrix1[i][j] + matrix2[i][j] * scale;
+		}}
+		return res;
+	}
 
-        if (max < 1.0E-10) return;   // no rotation
 
-        // calculate the square root of the determinant
-        d =  vel[0][3] * vel[1][2]
-            -vel[0][2] * vel[1][3]
-            +vel[0][1] * vel[2][3];
-
-        // We need to adjust so that the determinant is zero
-        // (abi,abj) are the indices of the largest element
-        // Determine the indices of that element's cofactor:
-        switch (abi*10+abj) {
-            case 1:  i=2; j=3; break;
-            case 2:  i=3; j=1; break;
-            case 3:  i=1; j=2; break;
-            case 12: i=0; j=3; break;
-            case 13: i=2; j=0; break;
-            case 23: i=0; j=1; break;
-            default: i=0; j=1; break;
-        }
-
-        // Adjust the cofactor to make the determinant zero.
-        vel[i][j] -= d / vel[abi][abj];
-        vel[j][i] = -vel[i][j];
-
-        // Calculate the rotation angle (the sum of the squares of the vel elements)
-        angl = 0;
-        for (i=0; i < 3; i++) {
-            for (j=i+1; j < 4; j++) angl += vel[i][j] * vel[i][j];
-        }
-        angl = Math.sqrt(angl);
-        if (angl < 1.0E-5) return;    // no rotation
-
-        // If the angle is too great, reduce all components of the velocity.
-        // (Don't want it to rotate too fast.)
-        if (angl > vmax) {
-            d = vmax / angl;
-            angl = vmax;
-            for (i=0; i < 3; i++) {
-                for (j=i+1; j < 4; j++) {
-                    vel[i][j] *= d;
-                    vel[j][i] = -vel[i][j];
-                }
-            }
-        }
-
-        // Now we need to build a rotation matrix from "vel".
-        // The rotation matrix can be expressed symbolically as
-        // R = lim          (I + (vel/n))^n
-        //     (n->infinity)
-        //
-        // Where I is the identity matrix and  "^n" represents the operation
-        //   of multiplying the matrix by itself n times.
-        // We expand the exponential as a power series in the matrix "vel", noting that R = exp(vel)
-        //   and using the standard power series expansion of the exponential.
-        // The "vel" matrix has the property that vel . vel . vel = -angl * angl * vel
-        //  (where "." is matrix multiplication)
-        // Define a matrix m1 as vel / angl.
-        // Then m1 . m1 . m1 = -m1
-        // Odd powers of m1 can be written as m1^(2n+1) = (-1)^n * m1
-        // Even powers of m1 can be written as m1^(2n+2) = (-1)^n * (m1 . m1)
-        // Define m2 as m1 . m1
-        // Odd powers of vel can be rewritten:  vel^(2n+1) = angl^(2n+1) * (-1)^n * m1
-        // Even powers > 0 of vel can be rewritten: vel^(2n+2) = angl^(2n+2) * (-1)^n * m2
-        // Rewrite the power series using m1 and m2.
-        // The odd terms are a series expansion of sin(angl) * m1
-        // The even terms with n > 0 are a series expansion of (1 - cos(angl)) * m2
-        // The zero-order term is the identity matrix.
-
-        // Build m1 by scaling vel by an appropriate factor.
-        // m1 has the property that m1 . m1 . m1 = -m1
-        // (where the "." is matrix multiplication)
-        for (i=0; i < 4; i++) m1[i][i] = 0;
-        for (i=0; i < 3; i++) {
-            for (j=i+1; j < 4; j++) {
-                m1[i][j] = vel[i][j] / angl;
-                m1[j][i] = -m1[i][j];
-            }
-        }
-
-        // Build m2, the square of m1:
-        for (i=0; i < 4; i++) {
-            for (j=i; j < 4; j++) {
-                m2[i][j] = 0.0;
-                for (k=0; k < 4; k++) m2[i][j] += (m1[i][k] * m1[k][j]);
-                m2[j][i] = m2[i][j];
-            }
-        }
-
-        // Build the rotation matrix
-        cosangl = 1.0 - Math.cos(angl);
-        sinangl = Math.sin(angl);
-        for (i=0; i < 4; i++) {
-            for (j=0; j < 4; j++) rot4[i][j] = sinangl*m1[i][j] + cosangl*m2[i][j];
-        }
-        for (i=0; i < 4; i++) rot4[i][i] += 1.0;
-
-        // Apply the small rotation "rot4" to the cumulative rotation "ROT4"
-        for (i=0; i < 4; i++) {
-            for (j=0; j < 4; j++) {
-                newROT[i][j] = 0.0;
-                for (k=0; k < 4; k++) newROT[i][j] += rot4[i][k] * ROT4[k][j];
-            }
-        }
-
-        // swap newROT with ROT4
-        holdROT = ROT4;
-        ROT4 = newROT;
-        newROT = holdROT;
+	public double[][] mulMatrix(double[][] matrix1, double[][] matrix2, int times){
+		double[][] res = new double[4][4];
+		for (int i = 0; i < 4; i++){
+		for (int j = 0; j < 4; j++){
+			for (int k = 0; k < 4; k++){
+				res[i][j] += matrix1[i][k] * matrix2[k][j];
+			}
+		}}
+		return res;
 	}
 
 	@Override
