@@ -1,5 +1,6 @@
 package com.mygdx.gdx1;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 import com.badlogic.gdx.Gdx;
@@ -12,12 +13,14 @@ import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
 import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
+import com.badlogic.gdx.math.Vector3;
 
 public class HyperCube implements Screen {
 	private PerspectiveCamera cam;
@@ -31,8 +34,9 @@ public class HyperCube implements Screen {
 	private Model model;
 
 	// CUbe info
-	private byte edges[][];       					// "from" and "to" vertex indices
     private double vertices[][];  					// vertex coords in 4-space
+	private byte edges[][];       					// "from" and "to" vertex indices
+	private ArrayList<int[]> faces = new ArrayList<int[]>(); 						// refernces to 4 vertices index
     private double m1[][] = new double[4][4];		// Used for rot4
     private double m2[][] = new double[4][4];
     private double rot4[][] = new double[4][4];  	// rotation matrix
@@ -48,7 +52,7 @@ public class HyperCube implements Screen {
 	// Cube param
 	private final double velmax = .03;  			// max velocity, radians per cycle
     private final double velinc = .006; 			// velocity increment, radians
-    double getSpeed() { return  0.2;}
+    double getSpeed() { return  0.0002;}
 
 
 
@@ -113,11 +117,35 @@ public class HyperCube implements Screen {
 					(float) p2[0],(float) p2[1],(float) p2[3]);
 		}
 
-		// 
+		// Faces
+		Material faceMaterial = new Material();
+		faceMaterial.set(new BlendingAttribute(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA));	
+		MeshPartBuilder builder2 = modelBuilder.part("face", GL20.GL_TRIANGLES, 3, faceMaterial);
+		builder2.setColor(new Color(0, 1, 0, 0.01f));
+		for (int[] face : faces){
+			double p1[] = rotateVertex(vertices[face[0]]);
+			double p2[] = rotateVertex(vertices[face[1]]);
+			double p3[] = rotateVertex(vertices[face[2]]);
+			double p4[] = rotateVertex(vertices[face[3]]);
+			// 1, 2, 3
+			builder2.triangle(
+					new Vector3((float) p1[0],(float) p1[1],(float) p1[2]),
+					new Vector3((float) p2[0],(float) p2[1],(float) p2[2]),
+					new Vector3((float) p3[0],(float) p3[1],(float) p3[2])
+					);
+			// 1, 3, 4
+			builder2.triangle(
+					new Vector3((float) p1[0],(float) p1[1],(float) p1[2]),
+					new Vector3((float) p3[0],(float) p3[1],(float) p3[2]),
+					new Vector3((float) p4[0],(float) p4[1],(float) p4[2])
+					);
+		}
 
 		model = modelBuilder.end();
 		instance = new ModelInstance(model);
 	}
+
+
 
 	public double[] rotateVertex(double vertex[]){
  		double res[] = {0, 0, 0, 0};
@@ -157,6 +185,22 @@ public class HyperCube implements Screen {
                 }
             }
         }
+
+		// Create the faces
+		for (int  ii = 0; ii < 15; ii++){
+		for (int  jj = ii + 1; jj < 16; jj++){ 
+		for (int  kk = jj + 1; kk < 16; kk++){ 
+		for (int  ll = kk + 1; ll < 16; ll++){ 
+			if (true){
+				int[] tmp = new int[4];
+				tmp[0] = ii;
+				tmp[1] = jj;
+				tmp[2] = kk;
+				tmp[3] = ll;
+				faces.add(tmp);
+			}
+		}}}}
+		// All possiblility of 4 edges comming back
 	}
 
 	public void updateRotationMatrix(){
