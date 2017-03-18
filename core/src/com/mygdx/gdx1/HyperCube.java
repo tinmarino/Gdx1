@@ -75,8 +75,8 @@ public class HyperCube implements Screen {
 		{  	  e1,      0,	   0,  	  e2},
 	};
     double getSpeed() { return  10;}
-	Color faceColor1 = new Color(0, 0, 1, 0.15f);
-	Color faceColor2 = new Color(0, 1, 0, 0.15f);
+	Color faceColor1 = new Color(0, 0, 1, 0.3f);
+	Color faceColor2 = new Color(0, 1, 0, 0.3f);
 
 
 
@@ -145,11 +145,21 @@ public class HyperCube implements Screen {
 		}
 
 		// Faces
+		drawFaces(modelBuilder, faces1, faceColor1);
+		drawFaces(modelBuilder, faces2, faceColor2);
+
+		model = modelBuilder.end();
+		instance = new ModelInstance(model);
+	}
+
+
+
+	public void drawFaces(ModelBuilder modelBuilder, ArrayList<int[]> faces, Color color){
 		Material faceMaterial = new Material();
 		faceMaterial.set(new BlendingAttribute(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA));	
 		MeshPartBuilder builder2 = modelBuilder.part("face", GL20.GL_TRIANGLES, 3, faceMaterial);
-		builder2.setColor(faceColor1);
-		for (int[] face : faces1){
+		builder2.setColor(color);
+		for (int[] face : faces){
 			double p1[] = rotateVertex(vertices[face[0]]);
 			double p2[] = rotateVertex(vertices[face[1]]);
 			double p3[] = rotateVertex(vertices[face[2]]);
@@ -180,10 +190,7 @@ public class HyperCube implements Screen {
 					);
 		}
 
-		model = modelBuilder.end();
-		instance = new ModelInstance(model);
 	}
-
 
 
 	public double[] rotateVertex(double vertex[]){
@@ -249,7 +256,12 @@ public class HyperCube implements Screen {
 					plane_index++;
 				}
 			}
-			faces.add(v_array);
+			if (m != 3){
+				faces1.add(v_array);
+			}
+			else{
+				faces2.add(v_array);
+			}
         }}}}
 	}
 
