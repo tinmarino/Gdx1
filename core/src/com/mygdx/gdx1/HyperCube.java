@@ -38,8 +38,9 @@ public class HyperCube implements Screen {
     private double vertices[][];  					// vertex coords in 4-space
 	private byte edges[][];       					// "from" and "to" vertex indices
  	// refernces to 4 vertices index
-	private ArrayList<int[]> faces1 = new ArrayList<int[]>();
-	private ArrayList<int[]> faces2 = new ArrayList<int[]>();
+	private ArrayList<int[]> faces1 = new ArrayList<int[]>(); // w = -1 
+	private ArrayList<int[]> faces2 = new ArrayList<int[]>(); // w = 1
+	private ArrayList<int[]> faces3 = new ArrayList<int[]>(); // w not constant 
     private double ROT4[][] = {	{1, 0, 0, 0},
 								{0, 1, 0, 0},
 								{0, 0, 1, 0},
@@ -75,8 +76,10 @@ public class HyperCube implements Screen {
 		{  	  e1,      0,	   0,  	  e2},
 	};
     double getSpeed() { return  10;}
-	Color faceColor1 = new Color(0, 0, 1, 0.3f);
-	Color faceColor2 = new Color(0, 1, 0, 0.3f);
+	Color faceColor1 = new Color(0, 0, 1, 0.20f);
+	Color faceColor2 = new Color(1, 0, 0, 0.20f);
+	Color faceColor3 = new Color(1, 1, 0, 0.05f);
+	Color colorEdge = new Color(1, 1, 0, 1);
 
 
 
@@ -136,7 +139,7 @@ public class HyperCube implements Screen {
 
 		// Lines 
 		MeshPartBuilder builder = modelBuilder.part("line", 1, 3, new Material());
-		builder.setColor(Color.RED);
+		builder.setColor(colorEdge);
 		for (byte[] edge : edges){
 			double p1[] = rotateVertex(vertices[edge[0]]);
 			double p2[] = rotateVertex(vertices[edge[1]]);
@@ -147,6 +150,7 @@ public class HyperCube implements Screen {
 		// Faces
 		drawFaces(modelBuilder, faces1, faceColor1);
 		drawFaces(modelBuilder, faces2, faceColor2);
+		drawFaces(modelBuilder, faces3, faceColor3);
 
 		model = modelBuilder.end();
 		instance = new ModelInstance(model);
@@ -257,10 +261,15 @@ public class HyperCube implements Screen {
 				}
 			}
 			if (m != 3){
-				faces1.add(v_array);
+				faces3.add(v_array);
 			}
 			else{
-				faces2.add(v_array);
+				if (bit1 > 0){
+					faces1.add(v_array);
+				}
+				else{
+					faces2.add(v_array);
+				}
 			}
         }}}}
 	}
