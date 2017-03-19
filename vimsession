@@ -2,10 +2,10 @@ let SessionLoad = 1
 if &cp | set nocp | endif
 let s:cpo_save=&cpo
 set cpo&vim
-inoremap <C-Space> 
-inoremap <expr> <Up> pumvisible() ? "\" : "\<Up>"
-inoremap <expr> <S-Tab> pumvisible() ? "\" : "\<S-Tab>"
 inoremap <expr> <Down> pumvisible() ? "\" : "\<Down>"
+inoremap <expr> <S-Tab> pumvisible() ? "\" : "\<S-Tab>"
+inoremap <expr> <Up> pumvisible() ? "\" : "\<Up>"
+inoremap <C-Space> 
 inoremap <silent> <C-F8> :RandomColorScheme
 inoremap <silent> <S-F8> :PrevColorScheme
 inoremap <silent> <F8> :NextColorScheme
@@ -14,8 +14,8 @@ inoremap <S-Down> :let tmp=getpos('.') :m+1 : call cursor(tmp[1]+1,tmp[2])
 inoremap <S-Up> :let tmp=getpos('.') :m-2 : call cursor(tmp[1]-1,tmp[2]) a
 vnoremap  "+p
 nnoremap  "+p
-vnoremap  :update
 nnoremap  :update
+vnoremap  :update
 onoremap  :update
 vnoremap  "+y
 nnoremap  "+y
@@ -66,9 +66,10 @@ map z3 :set foldlevel=3
 map z2 :set foldlevel=2
 map z1 :set foldlevel=1
 map z0 :set foldlevel=0
+nnoremap <SNR>64_: :=v:count ? v:count : ''
 vnoremap <silent> <Plug>NetrwBrowseXVis :call netrw#BrowseXVis()
 nnoremap <silent> <Plug>NetrwBrowseX :call netrw#BrowseX(expand((exists("g:netrw_gx")? g:netrw_gx : '<cfile>')),netrw#CheckIfRemote())
-nnoremap <SNR>64_: :=v:count ? v:count : ''
+nnoremap <SNR>63_: :=v:count ? v:count : ''
 nnoremap <silent> <C-F8> :RandomColorScheme
 nnoremap <silent> <S-F8> :PrevColorScheme
 nnoremap <silent> <F8> :NextColorScheme
@@ -116,7 +117,7 @@ set history=10000
 set hlsearch
 set incsearch
 set mouse=a
-set path=.,/usr/include,,,~/Software/Java/Libgdx/Jar/Source/libgdx-nightly-20160329/sources
+set path=.,/usr/include,,,~/Software/Java/Libgdx/Jar/Source/libgdx-nightly-20160329/sources,~/Software/Java/Libgdx/Jar/Git/gdx/src/**,~/Software/Java/Libgdx/Jar/Git/tests/gdx-tests/src/**,~/Software/Java/Libgdx/Jar/Git/backends/gdx-backend-android/src/**,~/Software/Java/Libgdx/Jar/Git/backends/gdx-backends-gwt/src/**,~/Software/Java/Libgdx/Jar/Git/backends/gdx-backend-lwjgl/src/**,'/home2/tourneboeuf/Software/Java/Libgdx/Jar/Lwjgl/src/java','/home2/tourneboeuf/Software/Java/Libgdx/Jar/Lwjgl/src/templates'
 set printoptions=paper:a4
 set ruler
 set runtimepath=~/.vim,~/.vim/bundle/L9,~/.vim/bundle/YouCompleteMe,~/.vim/bundle/command-t,~/.vim/bundle/nerdtree,~/.vim/bundle/tabular,~/.vim/bundle/vim-colorscheme-switcher,~/.vim/bundle/vim-fugitive,~/.vim/bundle/vim-misc,~/.vim/bundle/vis,/var/lib/vim/addons,/usr/share/vim/vimfiles,/usr/share/vim/vim74,/usr/share/vim/vimfiles/after,/var/lib/vim/addons/after,~/.vim/after,~/.vim/eclim,~/.vim/eclim/after
@@ -144,27 +145,30 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
 endif
 set shortmess=aoO
 badd +20 core/src/com/mygdx/gdx1/Activity1.java
-badd +0 core/src/com/mygdx/gdx1/Basic3DTest.java
-badd +0 core/src/com/mygdx/gdx1/BehaviorTreeTest.java
-badd +0 core/src/com/mygdx/gdx1/BehindTheSceneTest.java
-badd +0 core/src/com/mygdx/gdx1/LoadModelTest.java
-badd +0 core/src/com/mygdx/gdx1/LoadSceneTest2.java
-badd +0 core/src/com/mygdx/gdx1/LoadSceneTest.java
-badd +92 core/src/com/mygdx/gdx1/Networking.java
-badd +0 core/src/com/mygdx/gdx1/ShaderTest.java
-badd +56 core/src/com/mygdx/gdx1/NetInput.java
+badd +1 core/src/com/mygdx/gdx1/Basic3DTest.java
+badd +1 core/src/com/mygdx/gdx1/BehaviorTreeTest.java
+badd +1 core/src/com/mygdx/gdx1/BehindTheSceneTest.java
+badd +1 core/src/com/mygdx/gdx1/LoadModelTest.java
+badd +1 core/src/com/mygdx/gdx1/LoadSceneTest2.java
+badd +1 core/src/com/mygdx/gdx1/LoadSceneTest.java
+badd +171 core/src/com/mygdx/gdx1/Networking.java
+badd +1 core/src/com/mygdx/gdx1/ShaderTest.java
+badd +30 core/src/com/mygdx/gdx1/NetInput.java
+badd +66 core/src/com/mygdx/gdx1/HyperCube.java
+badd +144 core/src/com/mygdx/gdx1/BabyPony.java
+badd +23 ~/Software/Java/Libgdx/Jar/Git/gdx/src/com/badlogic/gdx/InputAdapter.java
 argglobal
 silent! argdel *
 argadd core/src/com/mygdx/gdx1/Activity1.java
-argadd core/src/com/mygdx/gdx1/Basic3DTest.java
-argadd core/src/com/mygdx/gdx1/BehaviorTreeTest.java
-argadd core/src/com/mygdx/gdx1/BehindTheSceneTest.java
-argadd core/src/com/mygdx/gdx1/LoadModelTest.java
-argadd core/src/com/mygdx/gdx1/LoadSceneTest2.java
-argadd core/src/com/mygdx/gdx1/LoadSceneTest.java
-argadd core/src/com/mygdx/gdx1/Networking.java
 argadd core/src/com/mygdx/gdx1/ShaderTest.java
-edit core/src/com/mygdx/gdx1/Networking.java
+argadd core/src/com/mygdx/gdx1/Networking.java
+argadd core/src/com/mygdx/gdx1/LoadSceneTest.java
+argadd core/src/com/mygdx/gdx1/LoadSceneTest2.java
+argadd core/src/com/mygdx/gdx1/LoadModelTest.java
+argadd core/src/com/mygdx/gdx1/BehindTheSceneTest.java
+argadd core/src/com/mygdx/gdx1/BehaviorTreeTest.java
+argadd core/src/com/mygdx/gdx1/Basic3DTest.java
+edit core/src/com/mygdx/gdx1/BabyPony.java
 set splitbelow splitright
 wincmd _ | wincmd |
 vsplit
@@ -178,13 +182,13 @@ set nosplitbelow
 set nosplitright
 wincmd t
 set winheight=1 winwidth=1
-exe 'vert 1resize ' . ((&columns * 102 + 86) / 172)
-exe '2resize ' . ((&lines * 3 + 26) / 52)
-exe 'vert 2resize ' . ((&columns * 69 + 86) / 172)
-exe '3resize ' . ((&lines * 46 + 26) / 52)
-exe 'vert 3resize ' . ((&columns * 69 + 86) / 172)
+exe 'vert 1resize ' . ((&columns * 93 + 92) / 184)
+exe '2resize ' . ((&lines * 5 + 27) / 55)
+exe 'vert 2resize ' . ((&columns * 90 + 92) / 184)
+exe '3resize ' . ((&lines * 47 + 27) / 55)
+exe 'vert 3resize ' . ((&columns * 90 + 92) / 184)
 argglobal
-edit core/src/com/mygdx/gdx1/Networking.java
+edit core/src/com/mygdx/gdx1/BabyPony.java
 inoreabbr <buffer> logger logger=eclim#java#logging#LoggingInit("logger")
 inoreabbr <buffer> log log=eclim#java#logging#LoggingInit("log")
 setlocal keymap=
@@ -230,6 +234,7 @@ setlocal foldenable
 set foldexpr=FoldMethod(v:lnum)
 setlocal foldexpr=FoldMethod(v:lnum)
 setlocal foldignore=#
+set foldlevel=1
 setlocal foldlevel=30
 setlocal foldmarker={{{,}}}
 set foldmethod=expr
@@ -298,16 +303,28 @@ setlocal nowinfixheight
 setlocal nowinfixwidth
 setlocal wrap
 setlocal wrapmargin=0
-40
+26
 normal! zo
-57
+60
 normal! zo
-let s:l = 149 - ((4 * winheight(0) + 25) / 50)
+86
+normal! zo
+98
+normal! zo
+139
+normal! zo
+151
+normal! zo
+190
+normal! zo
+210
+normal! zo
+let s:l = 86 - ((11 * winheight(0) + 26) / 53)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-149
-normal! 031|
+86
+normal! 09|
 wincmd w
 argglobal
 enew
@@ -424,7 +441,7 @@ setlocal wrap
 setlocal wrapmargin=0
 wincmd w
 argglobal
-edit core/src/com/mygdx/gdx1/NetInput.java
+edit core/src/com/mygdx/gdx1/Activity1.java
 inoreabbr <buffer> logger logger=eclim#java#logging#LoggingInit("logger")
 inoreabbr <buffer> log log=eclim#java#logging#LoggingInit("log")
 setlocal keymap=
@@ -538,27 +555,20 @@ setlocal nowinfixheight
 setlocal nowinfixwidth
 setlocal wrap
 setlocal wrapmargin=0
-36
+8
 normal! zo
-56
-normal! zo
-85
-normal! zo
-93
-normal! zo
-let s:l = 30 - ((29 * winheight(0) + 23) / 46)
+let s:l = 19 - ((17 * winheight(0) + 23) / 47)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-30
-normal! 05|
+19
+normal! 0
 wincmd w
-3wincmd w
-exe 'vert 1resize ' . ((&columns * 102 + 86) / 172)
-exe '2resize ' . ((&lines * 3 + 26) / 52)
-exe 'vert 2resize ' . ((&columns * 69 + 86) / 172)
-exe '3resize ' . ((&lines * 46 + 26) / 52)
-exe 'vert 3resize ' . ((&columns * 69 + 86) / 172)
+exe 'vert 1resize ' . ((&columns * 93 + 92) / 184)
+exe '2resize ' . ((&lines * 5 + 27) / 55)
+exe 'vert 2resize ' . ((&columns * 90 + 92) / 184)
+exe '3resize ' . ((&lines * 47 + 27) / 55)
+exe 'vert 3resize ' . ((&columns * 90 + 92) / 184)
 tabnext 1
 if exists('s:wipebuf')
   silent exe 'bwipe ' . s:wipebuf

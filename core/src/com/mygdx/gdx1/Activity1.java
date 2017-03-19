@@ -16,7 +16,8 @@ public class Activity1 extends Game{
 		// this.screen = new ShaderTest();
 		// this.screen = new NetInput();
 		// this.screen = new HyperCube();
-		this.screen = new BabyPony();
+		// this.screen = new BabyPony();
+		this.screen = new BulletTestCollision();
 		
 
 		this.screen.show();
