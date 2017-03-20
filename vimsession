@@ -2,10 +2,10 @@ let SessionLoad = 1
 if &cp | set nocp | endif
 let s:cpo_save=&cpo
 set cpo&vim
-inoremap <expr> <Down> pumvisible() ? "\" : "\<Down>"
-inoremap <expr> <S-Tab> pumvisible() ? "\" : "\<S-Tab>"
-inoremap <expr> <Up> pumvisible() ? "\" : "\<Up>"
 inoremap <C-Space> 
+inoremap <expr> <Up> pumvisible() ? "\" : "\<Up>"
+inoremap <expr> <S-Tab> pumvisible() ? "\" : "\<S-Tab>"
+inoremap <expr> <Down> pumvisible() ? "\" : "\<Down>"
 inoremap <silent> <C-F8> :RandomColorScheme
 inoremap <silent> <S-F8> :PrevColorScheme
 inoremap <silent> <F8> :NextColorScheme
@@ -134,7 +134,7 @@ set undolevels=10000
 set updatetime=2000
 set wildcharm=26
 set wildmenu
-set window=51
+set window=54
 set nowritebackup
 let s:so_save = &so | let s:siso_save = &siso | set so=0 siso=0
 let v:this_session=expand("<sfile>:p")
@@ -144,7 +144,7 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +20 core/src/com/mygdx/gdx1/Activity1.java
+badd +19 core/src/com/mygdx/gdx1/Activity1.java
 badd +1 core/src/com/mygdx/gdx1/Basic3DTest.java
 badd +1 core/src/com/mygdx/gdx1/BehaviorTreeTest.java
 badd +1 core/src/com/mygdx/gdx1/BehindTheSceneTest.java
@@ -155,20 +155,31 @@ badd +171 core/src/com/mygdx/gdx1/Networking.java
 badd +1 core/src/com/mygdx/gdx1/ShaderTest.java
 badd +30 core/src/com/mygdx/gdx1/NetInput.java
 badd +66 core/src/com/mygdx/gdx1/HyperCube.java
-badd +144 core/src/com/mygdx/gdx1/BabyPony.java
+badd +93 core/src/com/mygdx/gdx1/BabyPony.java
 badd +23 ~/Software/Java/Libgdx/Jar/Git/gdx/src/com/badlogic/gdx/InputAdapter.java
+badd +20 core/src/com/mygdx/gdx1/BulletTest1.java
+badd +1 core/src/com/mygdx/gdx1/BulletText1.java
+badd +22 core/src/com/mygdx/gdx1/BulletTestParent.java
+badd +97 core/src/com/mygdx/gdx1/BulletTestBase.java
+badd +25 core/src/com/mygdx/gdx1/BulletWorld.java
+badd +25 core/src/com/mygdx/gdx1/BaseWorld.java
+badd +21 core/src/com/mygdx/gdx1/BaseEntity.java
+badd +22 core/src/com/mygdx/gdx1/BulletEntity.java
+badd +17 core/src/com/mygdx/gdx1/BulletConstructor.java
+badd +27 core/src/com/mygdx/gdx1/ShootTest.java
+badd +0 core/src/com/mygdx/gdx1/BulletTestCollision.java
 argglobal
 silent! argdel *
 argadd core/src/com/mygdx/gdx1/Activity1.java
-argadd core/src/com/mygdx/gdx1/ShaderTest.java
-argadd core/src/com/mygdx/gdx1/Networking.java
-argadd core/src/com/mygdx/gdx1/LoadSceneTest.java
-argadd core/src/com/mygdx/gdx1/LoadSceneTest2.java
-argadd core/src/com/mygdx/gdx1/LoadModelTest.java
-argadd core/src/com/mygdx/gdx1/BehindTheSceneTest.java
-argadd core/src/com/mygdx/gdx1/BehaviorTreeTest.java
 argadd core/src/com/mygdx/gdx1/Basic3DTest.java
-edit core/src/com/mygdx/gdx1/BabyPony.java
+argadd core/src/com/mygdx/gdx1/BehaviorTreeTest.java
+argadd core/src/com/mygdx/gdx1/BehindTheSceneTest.java
+argadd core/src/com/mygdx/gdx1/LoadModelTest.java
+argadd core/src/com/mygdx/gdx1/LoadSceneTest2.java
+argadd core/src/com/mygdx/gdx1/LoadSceneTest.java
+argadd core/src/com/mygdx/gdx1/Networking.java
+argadd core/src/com/mygdx/gdx1/ShaderTest.java
+edit core/src/com/mygdx/gdx1/BulletTestCollision.java
 set splitbelow splitright
 wincmd _ | wincmd |
 vsplit
@@ -182,13 +193,13 @@ set nosplitbelow
 set nosplitright
 wincmd t
 set winheight=1 winwidth=1
-exe 'vert 1resize ' . ((&columns * 93 + 92) / 184)
-exe '2resize ' . ((&lines * 5 + 27) / 55)
-exe 'vert 2resize ' . ((&columns * 90 + 92) / 184)
-exe '3resize ' . ((&lines * 47 + 27) / 55)
-exe 'vert 3resize ' . ((&columns * 90 + 92) / 184)
+exe 'vert 1resize ' . ((&columns * 96 + 92) / 184)
+exe '2resize ' . ((&lines * 1 + 27) / 55)
+exe 'vert 2resize ' . ((&columns * 87 + 92) / 184)
+exe '3resize ' . ((&lines * 51 + 27) / 55)
+exe 'vert 3resize ' . ((&columns * 87 + 92) / 184)
 argglobal
-edit core/src/com/mygdx/gdx1/BabyPony.java
+edit core/src/com/mygdx/gdx1/BulletTestCollision.java
 inoreabbr <buffer> logger logger=eclim#java#logging#LoggingInit("logger")
 inoreabbr <buffer> log log=eclim#java#logging#LoggingInit("log")
 setlocal keymap=
@@ -303,28 +314,12 @@ setlocal nowinfixheight
 setlocal nowinfixwidth
 setlocal wrap
 setlocal wrapmargin=0
-26
-normal! zo
-60
-normal! zo
-86
-normal! zo
-98
-normal! zo
-139
-normal! zo
-151
-normal! zo
-190
-normal! zo
-210
-normal! zo
-let s:l = 86 - ((11 * winheight(0) + 26) / 53)
+let s:l = 93 - ((20 * winheight(0) + 26) / 53)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-86
-normal! 09|
+93
+normal! 037|
 wincmd w
 argglobal
 enew
@@ -441,7 +436,7 @@ setlocal wrap
 setlocal wrapmargin=0
 wincmd w
 argglobal
-edit core/src/com/mygdx/gdx1/Activity1.java
+edit core/src/com/mygdx/gdx1/ShootTest.java
 inoreabbr <buffer> logger logger=eclim#java#logging#LoggingInit("logger")
 inoreabbr <buffer> log log=eclim#java#logging#LoggingInit("log")
 setlocal keymap=
@@ -555,20 +550,20 @@ setlocal nowinfixheight
 setlocal nowinfixwidth
 setlocal wrap
 setlocal wrapmargin=0
-8
+22
 normal! zo
-let s:l = 19 - ((17 * winheight(0) + 23) / 47)
+let s:l = 24 - ((4 * winheight(0) + 25) / 51)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-19
-normal! 0
+24
+normal! 028|
 wincmd w
-exe 'vert 1resize ' . ((&columns * 93 + 92) / 184)
-exe '2resize ' . ((&lines * 5 + 27) / 55)
-exe 'vert 2resize ' . ((&columns * 90 + 92) / 184)
-exe '3resize ' . ((&lines * 47 + 27) / 55)
-exe 'vert 3resize ' . ((&columns * 90 + 92) / 184)
+exe 'vert 1resize ' . ((&columns * 96 + 92) / 184)
+exe '2resize ' . ((&lines * 1 + 27) / 55)
+exe 'vert 2resize ' . ((&columns * 87 + 92) / 184)
+exe '3resize ' . ((&lines * 51 + 27) / 55)
+exe 'vert 3resize ' . ((&columns * 87 + 92) / 184)
 tabnext 1
 if exists('s:wipebuf')
   silent exe 'bwipe ' . s:wipebuf

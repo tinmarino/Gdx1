@@ -19,9 +19,9 @@ package com.mygdx.gdx1;
 
 /** @author Xoppa */
 public class ShootTest extends BulletTestBase {
-	final int BOXCOUNT_X = 5;
-	final int BOXCOUNT_Y = 5;
-	final int BOXCOUNT_Z = 1;
+	final int BOXCOUNT_X = 10;
+	final int BOXCOUNT_Y = 10;
+	final int BOXCOUNT_Z = 2;
 
 	final float BOXOFFSET_X = -2.5f;
 	final float BOXOFFSET_Y = 0.5f;

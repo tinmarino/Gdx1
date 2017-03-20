@@ -30,37 +30,49 @@ public class BabyPony implements Screen {
 	// Disposable
 	private SpriteBatch batch;
 	private Sprite background;
-	private Texture textureEnnemy = new Texture("pony/pony_blue.png");
-	private Texture texturePony = new Texture("pony/pony_pink.png");
-	private Box2DDebugRenderer debugRenderer = new Box2DDebugRenderer(); 
+	private Texture textureEnnemy;
+	private Texture texturePony;
+	private Box2DDebugRenderer debugRenderer; 
 
 	// My stuff
+	private boolean debug = false;
 	private ArrayList<Character> ennemies = new ArrayList<Character>();
-	private Character pony;
 	private Vector2 vWorld = new Vector2(10, 10);
-	private float w2p;
+	private Vector2 vGame = new Vector2(8, 4);
 	private Random rand = new Random();
+	private Character pony;
+	private float w2p;
 
 
 	@Override
 	public void show(){
+		// Standard
 		w2p = Gdx.graphics.getWidth() / vWorld.x;
 		world = new World(new Vector2(0, 0), true);
-		batch = new SpriteBatch();
-
 		camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-		pony = new Character(this, WHO.ME);
+		batch = new SpriteBatch();
+		debugRenderer = new Box2DDebugRenderer();
+
+		// Images
+		texturePony = new Texture("pony/pony_pink.png");
+		textureEnnemy = new Texture("pony/pony_blue.png");
 		background = new Sprite(new Texture("pony/rink.png"));
-		background.setSize(0.8f * w2p * vWorld.x, 0.4f * w2p * vWorld.y);
+		background.setSize(w2p * vGame.x,  w2p * vGame.y);
 		background.setPosition(-background.getWidth() / 2, -background.getHeight() / 2);
+
+		// Character
+		pony = new Character(this, WHO.ME);
 	}
 
 	@Override
 	public void render(float delta){
-		// Update 
+		// Update Standard
 		world.step(delta, 6, 2);
 		camera.update();
 		batch.setProjectionMatrix(camera.combined);
+		
+		// Update My physics
+		pony.update(delta);
 		createEnnemy();
 		checkDead();
 
@@ -69,47 +81,23 @@ public class BabyPony implements Screen {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		batch.begin();
 			background.draw(batch);
-			pony.draw(batch);
 			for (Character ennemy : ennemies){
 				ennemy.draw(batch);
+				ennemy.update(delta);
 			}
+			pony.draw(batch);
 		batch.end();
 		
 		// Debug
-		// Matrix4 debugMatrix=new Matrix4(camera.combined);
-		// debugMatrix.scale(w2p, w2p, 1f);
-		// debugRenderer.render(world, debugMatrix);
-	}
-
-
-	public void createEnnemy(){
-		if (rand.nextInt(50) != 0){
-			return;
-		}
-		Character ennemy = new Character(this, WHO.YOU);
-		float y = 0.2f * (rand.nextFloat() -0.5f) * vWorld.y;
-		float x = -0.4f * vWorld.x;
-		ennemy.body.setTransform(new Vector2(x, y), 0);
-		ennemy.body.applyForceToCenter(new Vector2(50, 0), true);
-		ennemies.add(ennemy);
-	}
-
-	public void checkDead(){
-		float x = pony.body.getPosition().x;
-		float y = pony.body.getPosition().y;
-		boolean bol = x < -0.4f * vWorld.x;
-		bol |= x > 0.4f * vWorld.x;
-		bol |= y < -0.2f * vWorld.y;
-		bol |= y > 0.2f * vWorld.y;
-
-		if (bol){
-			pony.body.setTransform(0, 0, 0);
-			pony.body.setLinearVelocity(0, 0);
+		if (debug){
+			Matrix4 debugMatrix=new Matrix4(camera.combined);
+			debugMatrix.scale(w2p, w2p, 1f);
+			debugRenderer.render(world, debugMatrix);
 		}
 	}
 
 	@Override
-	public void dispose() {
+	public void dispose(){
 		batch.dispose();
 		background.getTexture().dispose();
 		textureEnnemy.dispose();
@@ -118,34 +106,59 @@ public class BabyPony implements Screen {
 	}
 
 	@Override
-	public void hide() {
-	}
+	public void hide(){}
 
 	@Override
-	public void pause() {
-	}
+	public void pause(){}
 
 	@Override
-	public void resize(int arg0, int arg1) {
-	}
+	public void resize(int width, int height){}
 
 	@Override
-	public void resume() {
+	public void resume(){}
+
+	/////////////////////////////////////////////////////////////////////////////////////////////////
+	// Utils 
+	////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	public void createEnnemy(){
+		if (rand.nextInt(50) != 0){
+			return;
+		}
+		Character ennemy = new Character(this, WHO.YOU);
+		float y = (rand.nextFloat() - 0.5f) * vGame.y;
+		float x = - 0.5f * vGame.x;
+		ennemy.body.setTransform(new Vector2(x, y), 0);
+		ennemy.body.applyForceToCenter(new Vector2(50, 0), true);
+		ennemies.add(ennemy);
 	}
 
+	public void checkDead(){
+		// Check
+		float x = pony.body.getPosition().x;
+		float y = pony.body.getPosition().y;
+		boolean bol = x < -0.5f * vGame.x;
+		bol |= x > 0.5f * vGame.x;
+		bol |= y < -0.5f * vGame.y;
+		bol |= y > 0.5f * vGame.y;
+
+		// Dye
+		if (bol){
+			pony.body.setTransform(0, 0, 0);
+			pony.body.setLinearVelocity(0, 0);
+		}
+	}
 
 
 	public class Character{
 		BabyPony parent;
-		Sprite sprite;
-		WHO who;
-		float x = 0, y = 0;
-		float angle;
-		float sizeWorld = 1;
-		float sizePixel;
-		Vector2 vForce = new Vector2(0, 0);
-
 		Body body;
+		Sprite sprite;
+		Vector2 vForce = new Vector2(0, 0);
+		// Parameters
+		WHO who;
+		float angle = 0, sizeWorld = 1, sizePixel;
+
 
 		public Character(BabyPony parent, WHO who){
 			this.parent = parent;
@@ -168,37 +181,34 @@ public class BabyPony implements Screen {
 		}
 
 		public void createBody(World world){
-			// body definition
+			// Create Body
 			BodyDef bodyDef = new BodyDef();
 			bodyDef.type = BodyType.DynamicBody;
-			bodyDef.position.set(0, 0);
-			// BodyShape 
+			body = world.createBody(bodyDef);
+
+			// Add Fixture
 			CircleShape shape = new CircleShape();
 			shape.setRadius(sizeWorld / 2);
-			// BodyFixture 
 			FixtureDef fixtureDef = new FixtureDef();
 			fixtureDef.shape = shape;
 			fixtureDef.restitution = 1;
-			// Create Body 
-			body = world.createBody(bodyDef);
 			body.createFixture(fixtureDef);
-			// Add Body Sprite 
-			body.setUserData(this); 
 		}
 
-		public void draw(SpriteBatch batch){
+		public void update(float delta){
 			// Get input
 			if (who == WHO.ME){
 				inputGetter();
 			}
 
 			// Apply force
-			body.applyForceToCenter(vForce.x, vForce.y, true);
+		}
 
+		public void draw(SpriteBatch batch){
 			// Get position 
 			Vector2 pos = body.getPosition();
-			x = pos.x * parent.w2p - sprite.getWidth() / 2;
-			y = pos.y * parent.w2p - sprite.getHeight() / 2;
+			float x = pos.x * parent.w2p - sprite.getWidth() / 2;
+			float y = pos.y * parent.w2p - sprite.getHeight() / 2;
 
 			// Draw 
 			sprite.setPosition(x, y);
@@ -211,27 +221,28 @@ public class BabyPony implements Screen {
 			if (Gdx.input.isKeyPressed(Keys.UP)){
 				vForce = new Vector2(0, iForce);
 				angle = 0;
-				return;
 			}
 
-			if (Gdx.input.isKeyPressed(Keys.DOWN)){
+			else if (Gdx.input.isKeyPressed(Keys.DOWN)){
 				vForce = new Vector2(0, -iForce);
 				angle = 180;
-				return;
 			}
 
-			if (Gdx.input.isKeyPressed(Keys.LEFT)){
+			else if (Gdx.input.isKeyPressed(Keys.LEFT)){
 				vForce = new Vector2(-iForce, 0);
 				angle = 90;
-				return;
 			}
 
-			if (Gdx.input.isKeyPressed(Keys.RIGHT)){
+			else if (Gdx.input.isKeyPressed(Keys.RIGHT)){
 				vForce = new Vector2(iForce, 0);
 				angle = -90;
-				return;
 			}
-			vForce = new Vector2(0, 0);
+
+			else{
+				vForce = new Vector2(0, 0);
+			}
+
+			body.applyForceToCenter(vForce.x, vForce.y, true);
 			return;
 		}
 
