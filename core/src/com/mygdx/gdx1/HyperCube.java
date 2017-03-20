@@ -20,61 +20,31 @@ import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
 import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
-import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 
 public class HyperCube implements Screen {
+	// Standard 
 	private PerspectiveCamera cam;
 	private CameraInputController inputController;
 	private ModelInstance instance;
 	private Environment environment;
-    private Random rand = new Random();
 
 	// Disposable
 	private ModelBatch modelBatch;
 	private Model model;
 
-	// CUbe info
-    private double vertices[][];  					// vertex coords in 4-space
-	private byte edges[][];       					// "from" and "to" vertex indices
- 	// refernces to 4 vertices index
-	private ArrayList<int[]> faces1 = new ArrayList<int[]>(); // w = -1 
-	private ArrayList<int[]> faces2 = new ArrayList<int[]>(); // w = 1
-	private ArrayList<int[]> faces3 = new ArrayList<int[]>(); // w not constant 
-    private double ROT4[][] = {	{1, 0, 0, 0},
-								{0, 1, 0, 0},
-								{0, 0, 1, 0},
-								{0, 0, 0, 1}
-							};
-	private double[][] vel = ROT4;
+	// USED
+    private double vertices[][];
+	private byte edges[][];
+	// faces1 : w=-1 | 2 : w=1 | 3 : w ot constant
+	private ArrayList<int[]> faces1 = new ArrayList<int[]>();
+	private ArrayList<int[]> faces2 = new ArrayList<int[]>();
+	private ArrayList<int[]> faces3 = new ArrayList<int[]>();
+	// Matrix
+    private double[][] ROT4 = MathUtil.id;	
+	private double[][] vel = MathUtil.id;
 
-	private static double e = 0.000005f;
-	private static double e1 = Math.sin(e);
-	private static double e2 = Math.cos(e);
-	private static double rotX[][] = {
-		{     e2,    -e1,  	   0,  	   0},
-		{     e1,     e2,      0,  	   0},
-		{      0,      0,      1,  	   0},
-		{  	   0,      0,	   0,  	   1},
-	};
-	private static double rotY[][] = {
-		{      1,      0,  	   0,  	   0},
-		{      0,     e2,    -e1,  	   0},
-		{      0,     e1,     e2,  	   0},
-		{  	   0,      0,	   0,  	   1},
-	};
-	private static double rotZ[][] = {
-		{      1,      0,  	   0,  	   0},
-		{      0,      1,      0,  	   0},
-		{      0,      0,     e2,  	 -e1},
-		{  	   0,      0,	  e1,  	  e2},
-	};
-	private static double rotW[][] = {
-		{     e2,      0,  	   0,  	 -e1},
-		{      0,      1,      0,  	   0},
-		{      0,      0,      1,  	   0},
-		{  	  e1,      0,	   0,  	  e2},
-	};
+	// Param
     double getSpeed() { return  10;}
 	Color faceColor1 = new Color(0, 0, 1, 0.20f);
 	Color faceColor2 = new Color(1, 0, 0, 0.20f);
@@ -100,8 +70,7 @@ public class HyperCube implements Screen {
 		cam.update();
 
 		// Model
-		createVertices();
-		updateRotationMatrix();
+		initHyperCube();
 		modelHyperCube();
 
 		// Input 
@@ -112,7 +81,8 @@ public class HyperCube implements Screen {
 	public void render(float delta) {
 		// Update
 		inputController.update();
-		updateRotationMatrix();
+		vel = MathUtil.updateVelocityMatrix(vel);
+		ROT4 = MathUtil.mulMatrix(ROT4, vel);
 		modelHyperCube();
 
 		// Render
@@ -121,9 +91,6 @@ public class HyperCube implements Screen {
 		modelBatch.begin(cam);
 		modelBatch.render(instance, environment);
 		modelBatch.end();
-
-		// Debug
-		// Gdx.app.log("TIN ", "rot" + ROT4[0][0]+","+ROT4[0][1]+","+ROT4[0][2]+","+ROT4[0][3]+",");
 	}
 
 	@Override
@@ -132,8 +99,24 @@ public class HyperCube implements Screen {
 		model.dispose();
 	}
 
+	@Override
+	public void hide(){}
 
+	@Override
+	public void pause(){}
+
+	@Override
+	public void resize(int arg0, int arg1) {}
+
+	@Override
+	public void resume(){}
+
+	/////////////////////////////////////////////////////////////////////////////////////////////////
+	// Utils 
+	////////////////////////////////////////////////////////////////////////////////////////////////
+	
 	public void modelHyperCube(){
+		// Begin batch
 		ModelBuilder modelBuilder = new ModelBuilder();
 		modelBuilder.begin();
 
@@ -141,8 +124,8 @@ public class HyperCube implements Screen {
 		MeshPartBuilder builder = modelBuilder.part("line", 1, 3, new Material());
 		builder.setColor(colorEdge);
 		for (byte[] edge : edges){
-			double p1[] = rotateVertex(vertices[edge[0]]);
-			double p2[] = rotateVertex(vertices[edge[1]]);
+			double p1[] = MathUtil.rotateVertex(ROT4, vertices[edge[0]]);
+			double p2[] = MathUtil.rotateVertex(ROT4, vertices[edge[1]]);
 			builder.line((float) p1[0], (float) p1[1],(float) p1[2],
 					(float) p2[0],(float) p2[1],(float) p2[2]);
 		}
@@ -152,11 +135,10 @@ public class HyperCube implements Screen {
 		drawFaces(modelBuilder, faces2, faceColor2);
 		drawFaces(modelBuilder, faces3, faceColor3);
 
+		// End batch
 		model = modelBuilder.end();
 		instance = new ModelInstance(model);
 	}
-
-
 
 	public void drawFaces(ModelBuilder modelBuilder, ArrayList<int[]> faces, Color color){
 		Material faceMaterial = new Material();
@@ -164,11 +146,11 @@ public class HyperCube implements Screen {
 		MeshPartBuilder builder2 = modelBuilder.part("face", GL20.GL_TRIANGLES, 3, faceMaterial);
 		builder2.setColor(color);
 		for (int[] face : faces){
-			double p1[] = rotateVertex(vertices[face[0]]);
-			double p2[] = rotateVertex(vertices[face[1]]);
-			double p3[] = rotateVertex(vertices[face[2]]);
-			double p4[] = rotateVertex(vertices[face[3]]);
-			// 1, 2, 3
+			double p1[] = MathUtil.rotateVertex(ROT4, vertices[face[0]]);
+			double p2[] = MathUtil.rotateVertex(ROT4, vertices[face[1]]);
+			double p3[] = MathUtil.rotateVertex(ROT4, vertices[face[2]]);
+			double p4[] = MathUtil.rotateVertex(ROT4, vertices[face[3]]);
+			// 1, 2, 3 // 
 			builder2.triangle(
 					new Vector3((float) p1[0],(float) p1[1],(float) p1[2]),
 					new Vector3((float) p2[0],(float) p2[1],(float) p2[2]),
@@ -193,48 +175,24 @@ public class HyperCube implements Screen {
 					new Vector3((float) p2[0],(float) p2[1],(float) p2[2])
 					);
 		}
-
 	}
 
-
-	public double[] rotateVertex(double vertex[]){
- 		double res[] = new double[4];
-		for (int j=0; j < 4; j++) {
-			for (int k=0; k < 4; k++){
-				res[j] += (ROT4[j][k] * vertex[k]);
-            }
-		}
-		return res;
-	}
-
-
-	public void createVertices(){
-        int i,j,k,dif,ct;
-
+	public void initHyperCube(){
+        // Create the vertices [1, 1, 1, -1]
         vertices = new double[16][4];
-        edges = new byte[32][2];
-
-        // create the vertices [1, 1, 1, -1]
-	
-        for (i=0; i < 16; i++) {
-            for (j=0; j < 4; j++){
+        for (int i=0; i < 16; i++) {
+            for (int j=0; j < 4; j++){
 				vertices[i][j] = (((i >> (3-j)) & 1) - 0.5) * 2;
 			}
-			Gdx.app.log("Tin ", "vetex " + i + " : " + vertices[i][0]+","+vertices[i][1]+","+vertices[i][2]+","+vertices[i][3]+",");
-
-
-
         }
 
-        // Create the edges
-        // Considering each vertex to be a 4-bit bit-pattern, there
-        //   is an edge between each pair of vertices that differ in only
-        //   one bit.
-        k = 0;
-        for (i=0; i < 15; i++) {
-            for (j=i+1; j < 16; j++) {
-                ct = 0;
-                for (dif=i^j; dif != 0; dif >>= 1) if ((dif&1) != 0) ct++;
+        // Create the edges: 3 coords in common 
+        edges = new byte[32][2];
+        int k = 0;
+        for (int i=0; i < 15; i++) {
+            for (int j=i+1; j < 16; j++) {
+                int ct = 0;
+                for (int dif=i^j; dif != 0; dif >>= 1) if ((dif&1) != 0) ct++;
                 if (ct == 1) {
                     edges[k][0] = (byte)i;
                     edges[k][1] = (byte)j;
@@ -243,9 +201,7 @@ public class HyperCube implements Screen {
             }
         }
 
-		// Create the faces
-        // m and n are a pair of distinct bit indexes
-	    // squares have the same m and n 
+		// Create the faces : 2 coords in common 
 		for (int m=0; m < 4; m++) {
         for (int n=0; n < m; n++) {
 		for (int bit1 = -1; bit1 <= 1; bit1 +=2){
@@ -274,51 +230,98 @@ public class HyperCube implements Screen {
         }}}}
 	}
 
-	public int random(){
-		return rand.nextInt(10) - 5;
-	}
-
-	// Rot4 update 
-	public void updateRotationMatrix(){
-		ROT4 = mulMatrix(ROT4, vel, 1); 
-		vel = mulMatrix(vel, rotX, random());
-		vel = mulMatrix(vel, rotY, random());
-		vel = mulMatrix(vel, rotZ, random());
-		vel = mulMatrix(vel, rotW, random());
-	}
 
 
+	public static class MathUtil{
+		private static double e = 0.000005f;
+		private static double e1 = Math.sin(e);
+		private static double e2 = Math.cos(e);
+    	private static Random rand = new Random();
 
-	public double[][] addMatrix(double[][] matrix1, double[][] matrix2, double scale){
-		double[][] res = new double[4][4];
-		for (int i = 0; i < 4; i++){
-		for (int j = 0; j < 4; j++){
-			res[i][j] = matrix1[i][j] + matrix2[i][j] * scale;
-		}}
-		return res;
-	}
+    	private static double id[][] = {	
+			{1, 0, 0, 0},
+			{0, 1, 0, 0},
+			{0, 0, 1, 0},
+			{0, 0, 0, 1}
+		};
+    	private static double mid[][] = {	
+			{-1, 0, 0, 0},
+			{0, -1, 0, 0},
+			{0, 0, -1, 0},
+			{0, 0, 0, -1}
+		};
+		private static double rotX[][] = {
+			{     e2,    -e1,  	   0,  	   0},
+			{     e1,     e2,      0,  	   0},
+			{      0,      0,      1,  	   0},
+			{  	   0,      0,	   0,  	   1},
+		};
+		private static double rotY[][] = {
+			{      1,      0,  	   0,  	   0},
+			{      0,     e2,    -e1,  	   0},
+			{      0,     e1,     e2,  	   0},
+			{  	   0,      0,	   0,  	   1},
+		};
+		private static double rotZ[][] = {
+			{      1,      0,  	   0,  	   0},
+			{      0,      1,      0,  	   0},
+			{      0,      0,     e2,  	 -e1},
+			{  	   0,      0,	  e1,  	  e2},
+		};
+		private static double rotW[][] = {
+			{     e2,      0,  	   0,  	 -e1},
+			{      0,      1,      0,  	   0},
+			{      0,      0,      1,  	   0},
+			{  	  e1,      0,	   0,  	  e2},
+		};
 
+		// res <- M1 x M2
+		public static double[][] mulMatrix(double[][] matrix1, double[][] matrix2){
+			double[][] res = new double[4][4];
+			for (int i = 0; i < 4; i++){
+			for (int j = 0; j < 4; j++){
+				for (int k = 0; k < 4; k++){
+					res[i][j] += matrix1[i][k] * matrix2[k][j];
+				}
+			}}
+			return res;
+		}
 
-	public double[][] mulMatrix(double[][] matrix1, double[][] matrix2, int times){
-		double[][] res = new double[4][4];
-		for (int i = 0; i < 4; i++){
-		for (int j = 0; j < 4; j++){
-			for (int k = 0; k < 4; k++){
-				res[i][j] += matrix1[i][k] * matrix2[k][j];
+		// res <- ROT4.vertex
+		public static double[] rotateVertex(double[][] ROT4, double vertex[]){
+			double res[] = new double[4];
+			for (int j=0; j < 4; j++) {
+				for (int k=0; k < 4; k++){
+					res[j] += (ROT4[j][k] * vertex[k]);
+				}
 			}
-		}}
-		return res;
+			return res;
+		}
+
+		public static double[][] randMulMatrix(double[][] vel, double[][] base){
+			double[][] res;
+			if (rand.nextInt(2) == 0){
+				res = id.clone();
+			}
+			else{
+				res = mid.clone();
+			}
+			int iRand = rand.nextInt(5);
+			for (int i=0; i < iRand; i++){
+				res = mulMatrix(res, base);
+			}
+			res = mulMatrix(vel, res);
+			return res;
+		}
+
+
+		public static double[][] updateVelocityMatrix(double[][] velIn){
+			double[][] vel = new double[4][4];
+			vel = randMulMatrix(velIn, rotX);
+			vel = randMulMatrix(vel, rotY);
+			vel = randMulMatrix(vel, rotZ);
+			vel = randMulMatrix(vel, rotW);
+			return vel;
+		}
 	}
-
-	@Override
-	public void hide() { }
-
-	@Override
-	public void pause() { }
-
-	@Override
-	public void resize(int arg0, int arg1) { }
-
-	@Override
-	public void resume() { }
 }
