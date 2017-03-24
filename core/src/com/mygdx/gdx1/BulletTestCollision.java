@@ -1,7 +1,9 @@
 package com.mygdx.gdx1;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
 import com.badlogic.gdx.input.GestureDetector;
 import com.badlogic.gdx.physics.bullet.collision.ContactResultCallback;
 import com.badlogic.gdx.physics.bullet.collision.btCollisionObject;
@@ -16,6 +18,9 @@ public class BulletTestCollision extends ShootTest{
 	Array<BulletEntity> hits = new Array<BulletEntity>();
 	Array<BulletEntity> contacts = new Array<BulletEntity>();
 	Array<Color> colors = new Array<Color>();
+	CameraInputController inputProcessor;
+	GestureDetector inputProcessor2;
+	InputMultiplexer inputMultiplexer;
 
 	public class TestContactResultCallback extends ContactResultCallback {
 		@Override
@@ -54,9 +59,17 @@ public class BulletTestCollision extends ShootTest{
 
 	@Override
 	public void show() {
-		Gdx.input.setInputProcessor(new GestureDetector(this));
+		// World 
 		super.show();
+		// Contact 
 		contactCB = new TestContactResultCallback();
+		// Input 
+		inputProcessor =  new CameraInputController(camera);
+		inputProcessor2 = new GestureDetector(this);
+		inputMultiplexer = new InputMultiplexer();
+		inputMultiplexer.addProcessor(inputProcessor2);
+		inputMultiplexer.addProcessor(inputProcessor);
+		Gdx.input.setInputProcessor(inputMultiplexer);
 	}
 
 	@Override
