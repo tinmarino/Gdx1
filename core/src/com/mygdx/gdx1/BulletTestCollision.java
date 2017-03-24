@@ -1,6 +1,7 @@
 package com.mygdx.gdx1;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input.Buttons;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
@@ -127,8 +128,14 @@ public class BulletTestCollision extends ShootTest{
 	@Override
 	public boolean tap (float x, float y, int count, int button) {
 		// What, x, y , impulse: defeined in BulletTEstBase
-		shoot("cylinder", x, y, 30);
-		Gdx.app.log("TIN : ", "From ShootTest : I shoot: " + x + ", " + y);
+		if (button == Buttons.LEFT){
+			shoot("sphere", x, y, 30);
+			Gdx.app.log("TIN : ", "From BulletTestCollision : I shoot: " + x + ", " + y);
+		}
+		else if (button == Buttons.RIGHT){
+			shoot("cylinder", x, y, 5);
+			Gdx.app.log("TIN : ", "From BulletTestCollision : I build: " + x + ", " + y);
+		}
 		return true;
 	}
 
