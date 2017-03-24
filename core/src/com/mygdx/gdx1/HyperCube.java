@@ -33,16 +33,8 @@ public class HyperCube implements Screen {
 	private ModelBatch modelBatch;
 	private Model model;
 
-	// USED
-    private double vertices[][];
-	private byte edges[][];
-	// faces1 : w=-1 | 2 : w=1 | 3 : w ot constant
-	private ArrayList<int[]> faces1 = new ArrayList<int[]>();
-	private ArrayList<int[]> faces2 = new ArrayList<int[]>();
-	private ArrayList<int[]> faces3 = new ArrayList<int[]>();
-	// Matrix
-    private double[][] ROT4 = MathUtil.id;	
-	private double[][] vel = MathUtil.id;
+	// Data
+	private Cube cube;
 
 	// Param
     double getSpeed() { return  10;}
@@ -70,8 +62,7 @@ public class HyperCube implements Screen {
 		cam.update();
 
 		// Model
-		initHyperCube();
-		modelHyperCube();
+		cube = new Cube();
 
 		// Input 
 		Gdx.input.setInputProcessor(inputController = new CameraInputController(cam));
@@ -81,9 +72,8 @@ public class HyperCube implements Screen {
 	public void render(float delta) {
 		// Update
 		inputController.update();
-		vel = MathUtil.updateVelocityMatrix(vel);
-		ROT4 = MathUtil.mulMatrix(ROT4, vel);
-		modelHyperCube();
+		cube.step(delta);
+		instance = cube.getInstance();
 
 		// Render
 		Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
@@ -115,121 +105,154 @@ public class HyperCube implements Screen {
 	// Utils 
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	
-	public void modelHyperCube(){
-		// Begin batch
-		ModelBuilder modelBuilder = new ModelBuilder();
-		modelBuilder.begin();
 
-		// Lines 
-		MeshPartBuilder builder = modelBuilder.part("line", 1, 3, new Material());
-		builder.setColor(colorEdge);
-		for (byte[] edge : edges){
-			double p1[] = MathUtil.rotateVertex(ROT4, vertices[edge[0]]);
-			double p2[] = MathUtil.rotateVertex(ROT4, vertices[edge[1]]);
-			builder.line((float) p1[0], (float) p1[1],(float) p1[2],
-					(float) p2[0],(float) p2[1],(float) p2[2]);
+
+
+
+
+	public class Cube{
+		// Vertex, Edge, Face
+    	private double vertices[][];
+		private byte edges[][];
+		// faces1 : w=-1 | 2 : w=1 | 3 : w ot constant
+		private ArrayList<int[]> faces1 = new ArrayList<int[]>();
+		private ArrayList<int[]> faces2 = new ArrayList<int[]>();
+		private ArrayList<int[]> faces3 = new ArrayList<int[]>();
+
+		// Camera matrix
+    	private double[][] ROT4 = MathUtil.id;	
+		private double[][] vel = MathUtil.id;
+
+
+
+		public Cube(){
+			init();
 		}
+		
 
-		// Faces
-		drawFaces(modelBuilder, faces1, faceColor1);
-		drawFaces(modelBuilder, faces2, faceColor2);
-		drawFaces(modelBuilder, faces3, faceColor3);
-
-		// End batch
-		model = modelBuilder.end();
-		instance = new ModelInstance(model);
-	}
-
-	public void drawFaces(ModelBuilder modelBuilder, ArrayList<int[]> faces, Color color){
-		Material faceMaterial = new Material();
-		faceMaterial.set(new BlendingAttribute(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA));	
-		MeshPartBuilder builder2 = modelBuilder.part("face", GL20.GL_TRIANGLES, 3, faceMaterial);
-		builder2.setColor(color);
-		for (int[] face : faces){
-			double p1[] = MathUtil.rotateVertex(ROT4, vertices[face[0]]);
-			double p2[] = MathUtil.rotateVertex(ROT4, vertices[face[1]]);
-			double p3[] = MathUtil.rotateVertex(ROT4, vertices[face[2]]);
-			double p4[] = MathUtil.rotateVertex(ROT4, vertices[face[3]]);
-			// 1, 2, 3 // 
-			builder2.triangle(
-					new Vector3((float) p1[0],(float) p1[1],(float) p1[2]),
-					new Vector3((float) p2[0],(float) p2[1],(float) p2[2]),
-					new Vector3((float) p3[0],(float) p3[1],(float) p3[2])
-					);
-			// 1, 2, 4
-			builder2.triangle(
-					new Vector3((float) p1[0],(float) p1[1],(float) p1[2]),
-					new Vector3((float) p2[0],(float) p2[1],(float) p2[2]),
-					new Vector3((float) p4[0],(float) p4[1],(float) p4[2])
-					);
-			// 3, 4, 1
-			builder2.triangle(
-					new Vector3((float) p3[0],(float) p3[1],(float) p3[2]),
-					new Vector3((float) p4[0],(float) p4[1],(float) p4[2]),
-					new Vector3((float) p1[0],(float) p1[1],(float) p1[2])
-					);
-			// 3, 4, 2
-			builder2.triangle(
-					new Vector3((float) p3[0],(float) p3[1],(float) p3[2]),
-					new Vector3((float) p4[0],(float) p4[1],(float) p4[2]),
-					new Vector3((float) p2[0],(float) p2[1],(float) p2[2])
-					);
-		}
-	}
-
-	public void initHyperCube(){
-        // Create the vertices [1, 1, 1, -1]
-        vertices = new double[16][4];
-        for (int i=0; i < 16; i++) {
-            for (int j=0; j < 4; j++){
-				vertices[i][j] = (((i >> (3-j)) & 1) - 0.5) * 2;
-			}
-        }
-
-        // Create the edges: 3 coords in common 
-        edges = new byte[32][2];
-        int k = 0;
-        for (int i=0; i < 15; i++) {
-            for (int j=i+1; j < 16; j++) {
-                int ct = 0;
-                for (int dif=i^j; dif != 0; dif >>= 1) if ((dif&1) != 0) ct++;
-                if (ct == 1) {
-                    edges[k][0] = (byte)i;
-                    edges[k][1] = (byte)j;
-                    k++;
-                }
-            }
-        }
-
-		// Create the faces : 2 coords in common 
-		for (int m=0; m < 4; m++) {
-        for (int n=0; n < m; n++) {
-		for (int bit1 = -1; bit1 <= 1; bit1 +=2){
-		for (int bit2 = -1; bit2 <= 1; bit2 +=2){
-			int plane_index = 0;
-			int v_array[] = new int[4];
-			for (int v= 0; v < vertices.length; v++){
-				boolean bol = (vertices[v][m] * bit1 > 0);
-				bol &= (vertices[v][n] * bit2 > 0);
-				if (bol){
-					v_array[plane_index] = v;
-					plane_index++;
+		// vertces edges, faces1, faces2, faces3
+		public void init(){
+    	    // Create the vertices [1, 1, 1, -1]
+    	    vertices = new double[16][4];
+    	    for (int i=0; i < 16; i++) {
+    	        for (int j=0; j < 4; j++){
+					vertices[i][j] = (((i >> (3-j)) & 1) - 0.5) * 2;
 				}
-			}
-			if (m != 3){
-				faces3.add(v_array);
-			}
-			else{
-				if (bit1 > 0){
-					faces1.add(v_array);
+    	    }
+
+    	    // Create the edges: 3 coords in common 
+    	    edges = new byte[32][2];
+    	    int k = 0;
+    	    for (int i=0; i < 15; i++) {
+    	        for (int j=i+1; j < 16; j++) {
+    	            int ct = 0;
+    	            for (int dif=i^j; dif != 0; dif >>= 1) if ((dif&1) != 0) ct++;
+    	            if (ct == 1) {
+    	                edges[k][0] = (byte)i;
+    	                edges[k][1] = (byte)j;
+    	                k++;
+    	            }
+    	        }
+    	    }
+
+			// Create the faces : 2 coords in common 
+			for (int m=0; m < 4; m++) {
+    	    for (int n=0; n < m; n++) {
+			for (int bit1 = -1; bit1 <= 1; bit1 +=2){
+			for (int bit2 = -1; bit2 <= 1; bit2 +=2){
+				int plane_index = 0;
+				int v_array[] = new int[4];
+				for (int v= 0; v < vertices.length; v++){
+					boolean bol = (vertices[v][m] * bit1 > 0);
+					bol &= (vertices[v][n] * bit2 > 0);
+					if (bol){
+						v_array[plane_index] = v;
+						plane_index++;
+					}
+				}
+				if (m != 3){
+					faces3.add(v_array);
 				}
 				else{
-					faces2.add(v_array);
+					if (bit1 > 0){
+						faces1.add(v_array);
+					}
+					else{
+						faces2.add(v_array);
+					}
 				}
-			}
-        }}}}
-	}
+    	    }}}}
+		}
 
+		public void step(float delta){
+			vel = MathUtil.updateVelocityMatrix(vel);
+			ROT4 = MathUtil.mulMatrix(ROT4, vel);
+		}
+
+		public ModelInstance getInstance(){
+			// Begin batch
+			ModelBuilder modelBuilder = new ModelBuilder();
+			modelBuilder.begin();
+
+			// Lines 
+			MeshPartBuilder builder = modelBuilder.part("line", 1, 3, new Material());
+			builder.setColor(colorEdge);
+			for (byte[] edge : edges){
+				double p1[] = MathUtil.rotateVertex(ROT4, vertices[edge[0]]);
+				double p2[] = MathUtil.rotateVertex(ROT4, vertices[edge[1]]);
+				builder.line((float) p1[0], (float) p1[1],(float) p1[2],
+						(float) p2[0],(float) p2[1],(float) p2[2]);
+			}
+
+			// Faces
+			drawFaces(modelBuilder, faces1, faceColor1);
+			drawFaces(modelBuilder, faces2, faceColor2);
+			drawFaces(modelBuilder, faces3, faceColor3);
+
+			// End batch
+			model = modelBuilder.end();
+			instance = new ModelInstance(model);
+			return instance;
+		}
+
+		// internal
+		private void drawFaces(ModelBuilder modelBuilder, ArrayList<int[]> faces, Color color){
+			Material faceMaterial = new Material();
+			faceMaterial.set(new BlendingAttribute(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA));	
+			MeshPartBuilder builder2 = modelBuilder.part("face", GL20.GL_TRIANGLES, 3, faceMaterial);
+			builder2.setColor(color);
+			for (int[] face : faces){
+				double p1[] = MathUtil.rotateVertex(ROT4, vertices[face[0]]);
+				double p2[] = MathUtil.rotateVertex(ROT4, vertices[face[1]]);
+				double p3[] = MathUtil.rotateVertex(ROT4, vertices[face[2]]);
+				double p4[] = MathUtil.rotateVertex(ROT4, vertices[face[3]]);
+				// 1, 2, 3 // 
+				builder2.triangle(
+						new Vector3((float) p1[0],(float) p1[1],(float) p1[2]),
+						new Vector3((float) p2[0],(float) p2[1],(float) p2[2]),
+						new Vector3((float) p3[0],(float) p3[1],(float) p3[2])
+						);
+				// 1, 2, 4
+				builder2.triangle(
+						new Vector3((float) p1[0],(float) p1[1],(float) p1[2]),
+						new Vector3((float) p2[0],(float) p2[1],(float) p2[2]),
+						new Vector3((float) p4[0],(float) p4[1],(float) p4[2])
+						);
+				// 3, 4, 1
+				builder2.triangle(
+						new Vector3((float) p3[0],(float) p3[1],(float) p3[2]),
+						new Vector3((float) p4[0],(float) p4[1],(float) p4[2]),
+						new Vector3((float) p1[0],(float) p1[1],(float) p1[2])
+						);
+				// 3, 4, 2
+				builder2.triangle(
+						new Vector3((float) p3[0],(float) p3[1],(float) p3[2]),
+						new Vector3((float) p4[0],(float) p4[1],(float) p4[2]),
+						new Vector3((float) p2[0],(float) p2[1],(float) p2[2])
+						);
+			}
+		}
+	}
 
 
 	public static class MathUtil{
