@@ -126,8 +126,9 @@ public class BulletTestCollision extends ShootTest{
 
 	@Override
 	public boolean tap (float x, float y, int count, int button) {
-		projectile = shoot(x, y);
-		Gdx.app.log("TIN : ", "From ShootTest : I shoot");
+		// What, x, y , impulse: defeined in BulletTEstBase
+		shoot("cylinder", x, y, 30);
+		Gdx.app.log("TIN : ", "From ShootTest : I shoot: " + x + ", " + y);
 		return true;
 	}
 

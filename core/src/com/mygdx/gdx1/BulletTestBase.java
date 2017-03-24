@@ -127,14 +127,47 @@ public class BulletTestBase extends BulletTestParent {
 			new Material(ColorAttribute.createDiffuse(Color.WHITE), ColorAttribute.createSpecular(Color.WHITE), FloatAttribute
 				.createShininess(16f)), Usage.Position | Usage.Normal);
 		disposables.add(groundModel);
+		// BOX 
 		final Model boxModel = modelBuilder.createBox(1f, 1f, 1f, new Material(ColorAttribute.createDiffuse(Color.WHITE),
 			ColorAttribute.createSpecular(Color.WHITE), FloatAttribute.createShininess(64f)), Usage.Position | Usage.Normal);
 		disposables.add(boxModel);
 
+		// SPHERE and rest from https://xoppa.github.io/blog/using-the-libgdx-3d-physics-bullet-wrapper-part1/
+		final Model sphereModel = modelBuilder.createSphere(1f, 1f, 1f, 10, 10,
+				new Material(ColorAttribute.createDiffuse(Color.GREEN)
+					),
+				Usage.Position | Usage.Normal);
+		disposables.add(sphereModel);
+
+		// CONE
+		final Model coneModel = modelBuilder.createCone(1f, 2f, 1f, 10,
+				new Material(ColorAttribute.createDiffuse(Color.BLUE)
+					),
+				Usage.Position | Usage.Normal);
+		disposables.add(coneModel);
+
+		// CAPSULE 
+		final Model capsuleModel = modelBuilder.createCapsule(0.5f, 2f, 10,
+				new Material(ColorAttribute.createDiffuse(Color.CYAN)
+					),
+				Usage.Position | Usage.Normal);
+		disposables.add(capsuleModel);
+
+		// CYLINDER
+		final Model cylinderModel = modelBuilder.createCylinder(1f, 2f, 1f, 10,
+				new Material(ColorAttribute.createDiffuse(Color.MAGENTA)
+					),
+				Usage.Position | Usage.Normal);
+		disposables.add(cylinderModel);
+
 		// Add the constructors
 		world.addConstructor("ground", new BulletConstructor(groundModel, 0f)); // mass = 0: static body
 		world.addConstructor("box", new BulletConstructor(boxModel, 1f)); // mass = 1kg: dynamic body
-		world.addConstructor("staticbox", new BulletConstructor(boxModel, 0f)); // mass = 0: static body
+		world.addConstructor("staticbox", new BulletConstructor(boxModel, 0f));
+		world.addConstructor("sphere", new BulletConstructor(sphereModel, 1f));
+		world.addConstructor("cone", new BulletConstructor(coneModel, 1f));
+		world.addConstructor("capsule", new BulletConstructor(capsuleModel, 1f));
+		world.addConstructor("cylinder", new BulletConstructor(cylinderModel, 1f));
 	}
 
 	@Override
