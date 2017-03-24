@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
@@ -37,7 +38,7 @@ public class HyperCube implements Screen {
 	private Cube cube;
 
 	// Param
-    double getSpeed() { return  10;}
+    double getSpeed() {return  10;}
 	Color faceColor1 = new Color(0, 0, 1, 0.20f);
 	Color faceColor2 = new Color(1, 0, 0, 0.20f);
 	Color faceColor3 = new Color(1, 1, 0, 0.05f);
@@ -65,12 +66,17 @@ public class HyperCube implements Screen {
 		cube = new Cube();
 
 		// Input 
-		Gdx.input.setInputProcessor(inputController = new CameraInputController(cam));
+		inputController = new CameraInputController(cam);
+		Gdx.input.setInputProcessor(inputController);
 	}
 
 	@Override
 	public void render(float delta) {
 		// Update
+		if (Gdx.input.isKeyPressed(Input.Keys.SPACE)){
+			cube.vel = MathUtil.id;
+			cube.ROT4 = MathUtil.id;
+		}
 		inputController.update();
 		cube.step(delta);
 		instance = cube.getInstance();
@@ -96,7 +102,7 @@ public class HyperCube implements Screen {
 	public void pause(){}
 
 	@Override
-	public void resize(int arg0, int arg1) {}
+	public void resize(int width, int height){}
 
 	@Override
 	public void resume(){}
@@ -105,10 +111,6 @@ public class HyperCube implements Screen {
 	// Utils 
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	
-
-
-
-
 
 	public class Cube{
 		// Vertex, Edge, Face
@@ -123,15 +125,8 @@ public class HyperCube implements Screen {
     	private double[][] ROT4 = MathUtil.id;	
 		private double[][] vel = MathUtil.id;
 
-
-
+		// Create vertces edges, faces1, faces2, faces3
 		public Cube(){
-			init();
-		}
-		
-
-		// vertces edges, faces1, faces2, faces3
-		public void init(){
     	    // Create the vertices [1, 1, 1, -1]
     	    vertices = new double[16][4];
     	    for (int i=0; i < 16; i++) {
@@ -184,6 +179,7 @@ public class HyperCube implements Screen {
     	    }}}}
 		}
 
+		// Update velocity and rotate camera <- camera x vel
 		public void step(float delta){
 			vel = MathUtil.updateVelocityMatrix(vel);
 			ROT4 = MathUtil.mulMatrix(ROT4, vel);
