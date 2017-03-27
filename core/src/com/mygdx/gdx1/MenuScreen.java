@@ -10,7 +10,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.utils.viewport.StretchViewport;
 
 public class MenuScreen implements Screen {
 	Stage stage;
@@ -35,12 +34,10 @@ public class MenuScreen implements Screen {
 			textButton.addListener(new ClickListener(){
 				@Override
 				public void clicked (InputEvent event, float x, float y) {
-					Gdx.app.log("GDX1 : ", "click button " + i);
 					setScreenWithName(i);
 				}
 			});
-			table.add(textButton).row();
-			Gdx.app.log("GDX1 : ", "Adding button " + i);
+			table.add(textButton).fillX().row();
 		}
 
 		ScrollPane scrollPane = new ScrollPane(table);
@@ -57,19 +54,13 @@ public class MenuScreen implements Screen {
 	}
 
 	public Screen getScreenWithName(String stg){
-		switch (stg){
-			case "BabyPony":
-				return new BabyPony();
-			case "HyperCube":
-				return new HyperCube();
-			default :
-				return new BabyPony();
-		}
+		Screen screen = Tests.getScreenFromName(stg);
+		return screen;
 	}
 
 	@Override
 	public void render(float delta) {
-		Gdx.gl.glClearColor(1, 1, 1, 1);
+		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		stage.act(delta);
 		stage.draw();
