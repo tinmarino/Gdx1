@@ -3,6 +3,7 @@ package com.mygdx.gdx1;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Buttons;
 import com.badlogic.gdx.InputMultiplexer;
+import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
 import com.badlogic.gdx.input.GestureDetector;
@@ -19,8 +20,8 @@ public class BulletTestCollision extends ShootTest{
 	Array<BulletEntity> hits = new Array<BulletEntity>();
 	Array<BulletEntity> contacts = new Array<BulletEntity>();
 	Array<Color> colors = new Array<Color>();
-	CameraInputController inputProcessor;
-	GestureDetector inputProcessor2;
+	InputProcessor inputProcessor;
+	InputProcessor inputProcessor2;
 	InputMultiplexer inputMultiplexer;
 
 	public class TestContactResultCallback extends ContactResultCallback {
@@ -65,6 +66,7 @@ public class BulletTestCollision extends ShootTest{
 		// Contact 
 		contactCB = new TestContactResultCallback();
 		// Input 
+		// inputProcessor =  new FirstPersonCameraController(camera);
 		inputProcessor =  new CameraInputController(camera);
 		inputProcessor2 = new GestureDetector(this);
 		inputMultiplexer = new InputMultiplexer();
