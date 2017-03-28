@@ -14,7 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.mygdx.gdx1;
+package com.mygdx.gdx1.bullet;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g3d.Environment;
@@ -36,7 +36,7 @@ import com.badlogic.gdx.physics.bullet.dynamics.btSequentialImpulseConstraintSol
 
 import com.badlogic.gdx.physics.bullet.linearmath.btIDebugDraw;
 import com.badlogic.gdx.utils.PerformanceCounter;
-import com.mygdx.gdx1.bullet.BulletEntity;
+import com.mygdx.gdx1.BaseWorld;
 
 /** @author xoppa Bullet physics world that holds all bullet entities and constructors. */
 public class BulletWorld extends BaseWorld<BulletEntity> {

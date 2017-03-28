@@ -10,13 +10,15 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.utils.reflect.ClassReflection;
 import com.badlogic.gdx.utils.reflect.ReflectionException;
 import com.mygdx.gdx1.bullet.BulletTestCollision;
+import com.mygdx.gdx1.bullet.HyperCube;
+import com.mygdx.gdx1.net.NetInput;
+import com.mygdx.gdx1.net.Networking;
 
 public class Tests{
 
 	private static List<Class<? extends Screen>> classList = 
 		new ArrayList<Class<? extends Screen>>(Arrays.asList(
-		BabyPony.class,
-		HyperCube.class
+		BabyPony.class
 	));
 
 	
@@ -26,6 +28,7 @@ public class Tests{
 	public static void  init(){
 		if (Gdx.app.getType() !=  Application.ApplicationType.WebGL){
 			classList.addAll( Arrays.asList(
+				HyperCube.class,
 				NetInput.class,
 				Networking.class,
 				Basic3DTest.class,

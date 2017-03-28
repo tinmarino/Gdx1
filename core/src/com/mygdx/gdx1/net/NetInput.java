@@ -1,4 +1,4 @@
-package com.mygdx.gdx1;
+package com.mygdx.gdx1.net;
 
 import java.io.BufferedReader;
 import java.io.IOException;

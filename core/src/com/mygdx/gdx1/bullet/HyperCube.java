@@ -1,4 +1,4 @@
-package com.mygdx.gdx1;
+package com.mygdx.gdx1.bullet;
 
 import java.util.ArrayList;
 import java.util.Random;

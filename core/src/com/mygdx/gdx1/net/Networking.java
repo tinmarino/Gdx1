@@ -3,7 +3,7 @@
 <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
 <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 */
-package com.mygdx.gdx1;
+package com.mygdx.gdx1.net;
 
 import java.io.BufferedReader;
 import java.io.IOException;

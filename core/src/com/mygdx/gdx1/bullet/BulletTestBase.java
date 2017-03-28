@@ -42,7 +42,6 @@ import com.badlogic.gdx.physics.bullet.linearmath.LinearMath;
 import com.badlogic.gdx.physics.bullet.linearmath.btIDebugDraw.DebugDrawModes;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
-import com.mygdx.gdx1.BulletWorld;
 
 /** @author xoppa */
 public class BulletTestBase extends BulletTestParent {
