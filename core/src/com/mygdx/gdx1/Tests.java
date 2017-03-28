@@ -4,15 +4,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.utils.reflect.ClassReflection;
-import com.badlogic.gdx.utils.reflect.ReflectionException;
-import com.mygdx.gdx1.bullet.BulletTestCollision;
-import com.mygdx.gdx1.bullet.HyperCube;
-import com.mygdx.gdx1.net.NetInput;
-import com.mygdx.gdx1.net.Networking;
 
 public class Tests{
 
@@ -26,6 +20,7 @@ public class Tests{
 	public static final List<Screen> tests = new ArrayList<Screen>();
 
 	public static void  init(){
+		/*
 		if (Gdx.app.getType() !=  Application.ApplicationType.WebGL){
 			classList.addAll( Arrays.asList(
 				HyperCube.class,
@@ -41,14 +36,10 @@ public class Tests{
 				BulletTestCollision.class
 			));
 		}
+		*/
 	}
 
-	public static Screen screenFromClass(Class<? extends Screen> screenClass){
-		Screen screen = screenClass.cast(Screen.class);
-		return screen;
-	}
-
-
+	// For the Button Label
 	public static ArrayList<String> getNames(){
 		ArrayList<String> screenNames = new ArrayList<String>();
 		for (Class<? extends Screen> screenClass : Tests.classList){
@@ -59,17 +50,20 @@ public class Tests{
 	}
 
 
+	// Instanciator
 	public static Screen getScreenFromName (String name) {
 		Screen screen = null;
-		for (Class<? extends Screen> clazz : classList)
+		for (Class<? extends Screen> clazz : classList){
+			Gdx.app.log("GDX1 : ", "Class name is  in loop :" + clazz.getSimpleName());
 			if (clazz.getSimpleName().equals(name)){
 				try {
 					screen = (Screen) ClassReflection.newInstance(clazz);
-				} catch (ReflectionException e) {
+				} catch (Exception e) {
 					// TODO Auto-generated catch block
-					e.printStackTrace();
+					Gdx.app.log("GDX1 : ", " " + e.getLocalizedMessage() + e.getMessage() +  e.getStackTrace());
 				}
 			}
+		}
 		return screen;
 	}
 }

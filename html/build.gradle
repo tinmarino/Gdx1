@@ -14,7 +14,9 @@ gwt {
     compiler {
         strict = true;
         enableClosureCompiler = true;
-        disableCastChecking = true;
+        // disableCastChecking = true;
+		// DEBUG Faster compile : no optimisation
+        draftCompile = true;
     }
 }
 
