@@ -15,28 +15,17 @@ public class Tests{
 		BabyPony.class
 	));
 
-	
+	public static List<Class<? extends Screen>> getClassList(){
+		return classList;
+	}
 
 	public static final List<Screen> tests = new ArrayList<Screen>();
 
-	public static void  init(){
-		/*
-		if (Gdx.app.getType() !=  Application.ApplicationType.WebGL){
-			classList.addAll( Arrays.asList(
-				HyperCube.class,
-				NetInput.class,
-				Networking.class,
-				Basic3DTest.class,
-				LoadModelTest.class,
-				LoadSceneTest.class,
-				LoadSceneTest2.class,
-				BehindTheSceneTest.class,
-				ShaderTest.class,
-				HyperCube.class,
-				BulletTestCollision.class
-			));
-		}
-		*/
+	public static void initGwt(){
+	}
+
+	// Called by Platforms Laucnher
+	public static void init(){
 	}
 
 	// For the Button Label

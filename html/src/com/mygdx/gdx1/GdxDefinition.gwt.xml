@@ -14,6 +14,7 @@
 	<source path=''>
 		<exclude name="**/bullet/*.java"/>
 		<exclude name="**/net/*.java"/>
+		<exclude name="**/TestsNotGwt.java"/>
 	</source>
 
 
@@ -22,6 +23,7 @@
 
 	<!-- Allow reflection -->
 	<extend-configuration-property name="gdx.reflect.include" value="com.mygdx.gdx1" />
+	<extend-configuration-property name="gdx.reflect.exclude" value="com.mygdx.gdx1.TestsNotGwt" />
 	<extend-configuration-property name="gdx.reflect.exclude" value="com.mygdx.gdx1.bullet" />
 	<extend-configuration-property name="gdx.reflect.exclude" value="com.mygdx.gdx1.net" />
 
