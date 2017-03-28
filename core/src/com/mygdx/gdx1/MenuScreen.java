@@ -62,7 +62,9 @@ public class MenuScreen implements Screen {
 	}
 
 	@Override
-	public void dispose() { }
+	public void dispose(){
+		skinLib.dispose();
+	}
 
 	@Override
 	public void hide() { }

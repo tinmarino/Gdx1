@@ -26,6 +26,9 @@ public class SkinLib{
 
 
 
+	public void dispose(){
+		font.dispose();
+	}
 
 	public SkinLib(){
 		initDefault();
@@ -166,6 +169,7 @@ public class SkinLib{
 		Texture t2 				= new Texture(PixmapFactory.circle(32, colorButtonDown));
 		return PixmapFactory.ninePatchFromTexture(t2); 
 	}
+
 	
 
 
