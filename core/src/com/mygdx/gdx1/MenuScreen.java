@@ -34,7 +34,7 @@ public class MenuScreen implements Screen {
 			textButton.addListener(new ClickListener(){
 				@Override
 				public void clicked (InputEvent event, float x, float y) {
-					setScreenWithName(i);
+					setScreenFromName(i);
 				}
 			});
 			table.add(textButton).fillX().row();
@@ -47,15 +47,10 @@ public class MenuScreen implements Screen {
 
 
 
-	public void setScreenWithName(String stg){
+	public void setScreenFromName(String stg){
 		Gdx.app.log("GDX1 : ", "Setting Screen to " + stg);
-		Screen screen = getScreenWithName(stg);
-		this.game.setScreen(screen);
-	}
-
-	public Screen getScreenWithName(String stg){
 		Screen screen = Tests.getScreenFromName(stg);
-		return screen;
+		this.game.setScreen(screen);
 	}
 
 	@Override
