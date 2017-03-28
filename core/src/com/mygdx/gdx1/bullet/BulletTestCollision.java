@@ -1,4 +1,4 @@
-package com.mygdx.gdx1;
+package com.mygdx.gdx1.bullet;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Buttons;

@@ -13,6 +13,7 @@ public class Activity1 extends Game{
 	
 	@Override
 	public void create () {
+		Tests.init();
 		this.screen = new MenuScreen(this);
 		this.screen.show();
 	}

@@ -14,8 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.mygdx.gdx1;
-
+package com.mygdx.gdx1.bullet;
 
 /** @author Xoppa */
 public class ShootTest extends BulletTestBase {

@@ -15,7 +15,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.mygdx.gdx1;
+package com.mygdx.gdx1.bullet;
 
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
