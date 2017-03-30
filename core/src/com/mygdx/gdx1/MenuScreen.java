@@ -35,13 +35,14 @@ public class MenuScreen implements Screen {
 		for (final String i : Tests.getNames()){
 			TextButton textButton = new TextButton(i, skinLib.getTextButton());
 			textButton.getLabel().setAlignment(Align.left);
-			textButton.setWidth(Gdx.graphics.getWidth());
 			textButton.addListener(new ClickListener(){
 				@Override
 				public void clicked (InputEvent event, float x, float y) {
 					setScreenFromName(i);
 				}
 			});
+			float scale = Gdx.graphics.getWidth() / textButton.getWidth();
+			textButton.getLabel().setFontScaleX(scale);
 			table.add(textButton).fill().left().expand().pad(5).row();
 		}
 
@@ -67,8 +68,6 @@ public class MenuScreen implements Screen {
 		stage.act(delta);
 		table.setWidth(Gdx.graphics.getWidth());
 		stage.draw();
-		Gdx.app.log("GDX1 : ", "Width22 " + scrollPane.getWidth() );
-		Gdx.app.log("GDX1 : ", "Widthtrable2 " + table.getWidth() );
 	}
 
 	@Override
