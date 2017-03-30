@@ -53,6 +53,7 @@ public class ShaderTest implements Screen {
 		NodePart blockPart = model.nodes.get(0).parts.get(0);
 		renderable = new Renderable();
 		blockPart.setRenderable(renderable);
+		// If null : no light
 		renderable.environment = environment;
 		renderable.worldTransform.idt();
 

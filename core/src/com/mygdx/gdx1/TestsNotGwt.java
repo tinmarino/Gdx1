@@ -28,7 +28,8 @@ public class TestsNotGwt{
 			HyperCube.class,
 			BulletTestCollision.class,
 
-			ChampLibre.class
+			ChampLibre.class,
+			NewYork.class
 		));
 	}
 }
