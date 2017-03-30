@@ -10,6 +10,8 @@ public class DesktopLauncher {
 	public static void main (String[] arg) {
 		TestsNotGwt.fillClassList(Tests.getClassList());
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
+		config.width = Math.round(320 * 1.f);
+		config.height = Math.round(480 * 1.f);
 		new LwjglApplication(new Activity1(), config);
 	}
 }
