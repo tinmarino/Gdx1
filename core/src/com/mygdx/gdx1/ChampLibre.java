@@ -38,6 +38,8 @@ public class ChampLibre implements Screen{
 
 		camController = new CameraInputController(cam);
 		camController.scrollFactor = -100;
+		// World unit per screnen size 
+		camController.pinchZoomFactor= 3000f;
 	    Gdx.input.setInputProcessor(camController);
 
         assets = new AssetManager();

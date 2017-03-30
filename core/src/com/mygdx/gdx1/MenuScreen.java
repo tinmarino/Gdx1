@@ -24,7 +24,6 @@ public class MenuScreen implements Screen {
 	@Override
 	public void show() {
 		stage = new Stage();
-		//stage.setViewport(new StretchViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
 		Gdx.input.setInputProcessor(stage);
 		skinLib = new SkinLib();
 		Table table = new Table();
@@ -74,7 +73,9 @@ public class MenuScreen implements Screen {
 	public void pause() { }
 
 	@Override
-	public void resize(int arg0, int arg1) { }
+	public void resize(int width, int height) {
+		stage.getViewport().update(width, height);
+	}
 
 	@Override
 	public void resume() { }
