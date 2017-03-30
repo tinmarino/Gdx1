@@ -55,7 +55,7 @@ public class SkinLib{
 	}
 
 	public static BitmapFont getFont(){
-		return new BitmapFont(Gdx.files.internal("font/adequate32.fnt"));
+		return new BitmapFont(Gdx.files.internal("font/open_sans_std_32.fnt"));
 	}
 
 
