@@ -26,7 +26,9 @@ public class TestsNotGwt{
 			BehindTheSceneTest.class,
 			ShaderTest.class,
 			HyperCube.class,
-			BulletTestCollision.class
+			BulletTestCollision.class,
+
+			ChampLibre.class
 		));
 	}
 }

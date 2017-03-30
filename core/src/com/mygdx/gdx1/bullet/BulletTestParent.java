@@ -131,6 +131,10 @@ public class BulletTestParent implements Screen, InputProcessor, GestureListener
 	}
 
 	@Override
+	public void pinchStop () {
+	}
+
+	@Override
 	public void hide() {
 	}
 

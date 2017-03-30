@@ -43,6 +43,7 @@ public class MenuScreen implements Screen {
 		ScrollPane scrollPane = new ScrollPane(table);
 		scrollPane.setFillParent(true);
 		stage.addActor(scrollPane);
+		stage.setScrollFocus(scrollPane);
 	}
 
 

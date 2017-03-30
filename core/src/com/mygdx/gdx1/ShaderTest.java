@@ -2,24 +2,22 @@ package com.mygdx.gdx1;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.assets.loaders.ModelLoader;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
+import com.badlogic.gdx.graphics.VertexAttributes.Usage;
 import com.badlogic.gdx.graphics.g3d.Environment;
+import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.Shader;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
-import com.badlogic.gdx.graphics.g3d.loader.G3dModelLoader;
 import com.badlogic.gdx.graphics.g3d.model.NodePart;
-import com.badlogic.gdx.graphics.g3d.model.data.ModelData;
 import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
 import com.badlogic.gdx.graphics.g3d.utils.DefaultTextureBinder;
+import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.RenderContext;
-import com.badlogic.gdx.graphics.g3d.utils.TextureProvider;
-import com.badlogic.gdx.utils.UBJsonReader;
 
 public class ShaderTest implements Screen {
 	public PerspectiveCamera cam;
@@ -46,12 +44,13 @@ public class ShaderTest implements Screen {
 		camController = new CameraInputController(cam);
 		Gdx.input.setInputProcessor(camController);
 
-        ModelLoader modelLoader = new G3dModelLoader(new UBJsonReader());
-        ModelData modelData = modelLoader.loadModelData(Gdx.files.internal("data/invaderscene.g3db"));
-        model = new Model(modelData, new TextureProvider.FileTextureProvider());
 
-		NodePart blockPart = model.getNode("ship").parts.get(0);
+		ModelBuilder modelBuilder = new ModelBuilder();
+		model = modelBuilder.createSphere(2f, 2f, 2f, 20, 20, 
+		new Material(),
+		Usage.Position | Usage.Normal | Usage.TextureCoordinates);
 
+		NodePart blockPart = model.nodes.get(0).parts.get(0);
 		renderable = new Renderable();
 		blockPart.setRenderable(renderable);
 		renderable.environment = environment;
