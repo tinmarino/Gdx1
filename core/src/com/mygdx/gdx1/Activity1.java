@@ -17,6 +17,8 @@ public class Activity1 extends Game{
 	public void create () {
 		Gdx.app.setLogLevel(Application.LOG_INFO);
 		Gdx.app.log("GDX1 : ", "Activity starting");
+		// For android back
+		Gdx.input.setCatchBackKey(true);
 		this.screen = new MenuScreen(this);
 		this.screen.show();
 	}
@@ -24,7 +26,9 @@ public class Activity1 extends Game{
 	@Override
 	public void render () {
 		super.render();
-		if (Gdx.input.isKeyPressed(Input.Keys.ESCAPE)){
+		boolean bol = Gdx.input.isKeyPressed(Input.Keys.ESCAPE);
+		bol |= Gdx.input.isKeyPressed(Input.Keys.BACK);
+		if (bol){
 			setScreen(new MenuScreen(this));
 		}
 	}
