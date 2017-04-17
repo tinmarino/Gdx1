@@ -17,7 +17,6 @@ public class MenuScreen implements Screen {
 	SkinLib skinLib;
 	Game game;
 	// TMP
-	ScrollPane scrollPane;
 	Table table;
 
 
@@ -47,7 +46,7 @@ public class MenuScreen implements Screen {
 		}
 
 
-		scrollPane = new ScrollPane(table);
+		ScrollPane scrollPane = new ScrollPane(table);
 		scrollPane.setFillParent(true);
 		stage.addActor(scrollPane);
 		stage.setScrollFocus(scrollPane);
@@ -66,7 +65,6 @@ public class MenuScreen implements Screen {
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		stage.act(delta);
-		table.setWidth(Gdx.graphics.getWidth());
 		stage.draw();
 	}
 
@@ -85,6 +83,7 @@ public class MenuScreen implements Screen {
 	public void resize(int width, int height) {
 		// True to center camera on screen
 		stage.getViewport().update(width, height, true);
+		table.setWidth(Gdx.graphics.getWidth());
 	}
 
 	@Override

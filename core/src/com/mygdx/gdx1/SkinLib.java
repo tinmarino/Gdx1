@@ -22,12 +22,17 @@ public class SkinLib{
 	BitmapFont font; 
 	Color colorFont, colorBackground, colorButton, colorSelection;
 	Color colorButtonUp, colorButtonDown;
-
+	List<Disposable> disposableList;
 
 
 
 	public void dispose(){
 		font.dispose();
+		for (Disposable disposable : disposableList){
+			if (disposable != null){
+				disposable.dispose();
+			}
+		}
 	}
 
 	public SkinLib(){
@@ -126,7 +131,7 @@ public class SkinLib{
 	}
 
 
-	public TextFieldStyle getTextField(List<Disposable> disposableList){
+	public TextFieldStyle getTextField(){
 		TextFieldStyle style 	= new TextFieldStyle(); 
 		style.font 				= font;
 		style.fontColor 		= colorFont;

@@ -12,7 +12,8 @@ public class Tests{
 
 	private static List<Class<? extends Screen>> classList = 
 		new ArrayList<Class<? extends Screen>>(Arrays.asList(
-		BabyPony.class
+		BabyPony.class,
+		ColorNewton.class
 	));
 
 	public static List<Class<? extends Screen>> getClassList(){
