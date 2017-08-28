@@ -15,11 +15,14 @@ public class Activity1 extends Game{
 
 	@Override
 	public void create () {
+		// Log Gdx 
 		Gdx.app.setLogLevel(Application.LOG_INFO);
-		Gdx.app.log("GDX1 : ", "Activity starting");
-		// For android back
+		Gdx.app.log("GDX1 : ", "Activity starting on " + Gdx.app.getType());
+
+		// For android back key
 		Gdx.input.setCatchBackKey(true);
-		this.screen = new MenuScreen(this);
+		// this.screen = new MenuScreen(this);
+		this.screen = new ShaderTest();
 		this.screen.show();
 	}
 

@@ -45,7 +45,6 @@ public class MenuScreen implements Screen {
 			table.add(textButton).fill().left().expand().pad(5).row();
 		}
 
-
 		ScrollPane scrollPane = new ScrollPane(table);
 		scrollPane.setFillParent(true);
 		stage.addActor(scrollPane);

@@ -145,6 +145,7 @@ public class SkinLib{
 		LabelStyle style 		= new LabelStyle();
 		style.font 				= font; 
 		style.fontColor 		= colorFont;
+		style.background 		= PixmapFactory.getDrawableMonocromatic(1, 1, colorBackground, disposableList);
 		return style;
 	}
 

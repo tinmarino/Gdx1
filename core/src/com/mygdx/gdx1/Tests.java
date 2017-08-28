@@ -8,10 +8,19 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.utils.reflect.ClassReflection;
 
+/*
+ 	The list of classes I can load on all platforms.
+	The classes to be loaded without GWT are in TestsNotGwt Which is loaded by the 
+		desktopLauncher or ANdroidLauncher
+*/
+
 public class Tests{
 
 	private static List<Class<? extends Screen>> classList = 
 		new ArrayList<Class<? extends Screen>>(Arrays.asList(
+		GpsSpeed.class,
+		Compass.class,
+		UiColorTest.class,
 		BabyPony.class,
 		ColorNewton.class
 	));
@@ -20,14 +29,10 @@ public class Tests{
 		return classList;
 	}
 
-	public static final List<Screen> tests = new ArrayList<Screen>();
-
-	public static void initGwt(){
-	}
+	public static void initGwt(){}
 
 	// Called by Platforms Laucnher
-	public static void init(){
-	}
+	public static void init(){}
 
 	// For the Button Label
 	public static ArrayList<String> getNames(){
@@ -44,12 +49,11 @@ public class Tests{
 	public static Screen getScreenFromName (String name) {
 		Screen screen = null;
 		for (Class<? extends Screen> clazz : classList){
-			Gdx.app.log("GDX1 : ", "Class name is  in loop :" + clazz.getSimpleName());
+			Gdx.app.log("GDX1 : ", "Class name is in loop :" + clazz.getSimpleName());
 			if (clazz.getSimpleName().equals(name)){
 				try {
 					screen = (Screen) ClassReflection.newInstance(clazz);
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
 					Gdx.app.log("GDX1 : ", " " + e.getLocalizedMessage() + e.getMessage() +  e.getStackTrace());
 				}
 			}
@@ -57,4 +61,3 @@ public class Tests{
 		return screen;
 	}
 }
-

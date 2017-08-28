@@ -222,6 +222,25 @@ public class PixmapFactory{
 		return pixmap;
 	}
 
+	public static Pixmap arrow(Pixmap pixmap, Color color){
+		int width = pixmap.getWidth();
+		int height = pixmap.getHeight();
+		pixmap.setColor(color);
+		// Head
+		pixmap.fillTriangle(
+				(int) (0.70f * width), (int) (0.43f * height),
+				(int) (0.70f * width), (int) (0.57f * height), 
+				(int) (0.80f * width), (int) (0.50f * height)
+				);
+		pixmap.fillRectangle(
+				(int) (0.20f * width),
+				(int) (0.47f * height),
+				(int) (0.50f * width),
+				(int) (0.07f * height)
+				);
+		return pixmap;
+	}
+
 	// TODO mutualise
 	public static Pixmap stat(Pixmap pixmap, Color color){
 		int width = pixmap.getWidth();
@@ -312,7 +331,7 @@ public class PixmapFactory{
 	}
 
 
-	public static Pixmap circle(int radius,Color color) {
+	public static Pixmap circle(int radius, Color color) {
 		Pixmap res = new Pixmap( radius , radius , Format.RGBA8888);
 		
 		res.setColor(color);

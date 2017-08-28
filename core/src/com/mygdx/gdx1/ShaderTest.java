@@ -53,8 +53,10 @@ public class ShaderTest implements Screen {
 		NodePart blockPart = model.nodes.get(0).parts.get(0);
 		renderable = new Renderable();
 		blockPart.setRenderable(renderable);
-		// If null : no light
+		// Note: If null : no light
 		renderable.environment = environment;
+		// Note: Next line to see just the points
+		// renderable.meshPart.primitiveType = GL20.GL_POINTS;
 		renderable.worldTransform.idt();
 
 		renderContext = new RenderContext(new DefaultTextureBinder(DefaultTextureBinder.WEIGHTED, 1));
