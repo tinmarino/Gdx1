@@ -60,7 +60,16 @@ public class ShaderTest implements Screen {
 		renderable.worldTransform.idt();
 
 		renderContext = new RenderContext(new DefaultTextureBinder(DefaultTextureBinder.WEIGHTED, 1));
-		shader = new DefaultShader(renderable);
+
+
+		// Shader Custom
+		// shader = new DefaultShader(renderable);
+		// String vert = Gdx.files.internal("data/test.vertex.glsl").readString();
+       	// String frag = Gdx.files.internal("data/test.fragment.glsl").readString();
+       	// shader = new DefaultShader(renderable, new DefaultShader.Config(vert, frag));
+
+		// Shader class
+		shader = new ShaderClass();
 		shader.init();
 	}
 
