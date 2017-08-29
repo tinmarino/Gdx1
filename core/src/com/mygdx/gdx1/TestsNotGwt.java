@@ -16,6 +16,10 @@ public class TestsNotGwt{
 
 	public static void fillClassList(List<Class<? extends Screen>> classList){
 		classList.addAll(Arrays.asList(
+
+			RayPickingTest.class,
+			FrustumCullingTest.class,
+			MaterialTest.class,
 			HyperCube.class,
 			NetInput.class,
 			Networking.class,
