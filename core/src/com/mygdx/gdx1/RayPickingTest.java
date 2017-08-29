@@ -18,7 +18,6 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
-import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.math.collision.Ray;
@@ -205,23 +204,33 @@ public class RayPickingTest extends InputAdapter implements Screen {
 		}
 	}
 
-	public int getObject (int screenX, int screenY) {
-		Ray ray = cam.getPickRay(screenX, screenY);
-		int result = -1;
-		float distance = -1;
-		for (int i = 0; i < instances.size; ++i) {
-			final GameObject instance = instances.get(i);
-			instance.transform.getTranslation(position);
-			position.add(instance.center);
-			float dist2 = ray.origin.dst2(position);
-			if (distance >= 0f && dist2 > distance) continue;
-			if (Intersector.intersectRaySphere(ray, position, instance.radius, null)) {
-				result = i;
-				distance = dist2;
-			}
-		}
-		return result;
-	}
+    public int getObject (int screenX, int screenY) {
+        Ray ray = cam.getPickRay(screenX, screenY);
+
+        int result = -1;
+        float distance = -1;
+
+        for (int i = 0; i < instances.size; ++i) {
+            final GameObject instance = instances.get(i);
+
+            instance.transform.getTranslation(position);
+            position.add(instance.center);
+
+            final float len = ray.direction.dot(position.x-ray.origin.x, position.y-ray.origin.y, position.z-ray.origin.z);
+            if (len < 0f)
+                continue;
+
+            float dist2 = position.dst2(ray.origin.x+ray.direction.x*len, ray.origin.y+ray.direction.y*len, ray.origin.z+ray.direction.z*len);
+            if (distance >= 0f && dist2 > distance) 
+                continue;
+
+            if (dist2 <= instance.radius * instance.radius) {
+                result = i;
+                distance = dist2;
+            }
+        }
+        return result;
+    }
 
 	@Override
 	public void dispose () {
