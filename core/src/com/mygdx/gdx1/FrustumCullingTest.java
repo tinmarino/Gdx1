@@ -45,12 +45,14 @@ public class FrustumCullingTest implements Screen {
         public final Vector3 dimensions = new Vector3();
 
         private final static BoundingBox bounds = new BoundingBox();
+        public final float radius;
 
         public GameObject(Model model, String rootNode, boolean mergeTransform) {
             super(model, rootNode, mergeTransform);
             calculateBoundingBox(bounds);
             bounds.getCenter(center);
             bounds.getDimensions(dimensions);
+            radius = dimensions.len() / 2f;
         }
     }
 
@@ -147,7 +149,7 @@ public class FrustumCullingTest implements Screen {
     protected boolean isVisible(final Camera cam, final GameObject instance) {
         instance.transform.getTranslation(position);
         position.add(instance.center);
-        return cam.frustum.boundsInFrustum(position, instance.dimensions);
+        return cam.frustum.sphereInFrustum(position, instance.radius);
     }
 
     @Override
