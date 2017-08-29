@@ -166,7 +166,16 @@ public class RayPickingTest extends InputAdapter implements Screen {
 
 	@Override
 	public boolean touchDragged (int screenX, int screenY, int pointer) {
-		return selecting >= 0;
+        if (selecting < 0) 
+            return false;
+        if (selected == selecting) {
+            Ray ray = cam.getPickRay(screenX, screenY);
+			// Cuase we want y = 0  (plane XZ)
+            final float distance = -ray.origin.y / ray.direction.y;
+            position.set(ray.direction).scl(distance).add(ray.origin);
+            instances.get(selected).transform.setTranslation(position);
+        }
+        return true;
 	}
 
 	@Override
