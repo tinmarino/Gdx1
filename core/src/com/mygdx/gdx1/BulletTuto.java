@@ -21,20 +21,26 @@ import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.bullet.Bullet;
 import com.badlogic.gdx.physics.bullet.collision.CollisionObjectWrapper;
 import com.badlogic.gdx.physics.bullet.collision.btBoxShape;
+import com.badlogic.gdx.physics.bullet.collision.btCapsuleShape;
 import com.badlogic.gdx.physics.bullet.collision.btCollisionAlgorithm;
 import com.badlogic.gdx.physics.bullet.collision.btCollisionDispatcher;
 import com.badlogic.gdx.physics.bullet.collision.btCollisionObject;
 import com.badlogic.gdx.physics.bullet.collision.btCollisionShape;
+import com.badlogic.gdx.physics.bullet.collision.btConeShape;
+import com.badlogic.gdx.physics.bullet.collision.btCylinderShape;
 import com.badlogic.gdx.physics.bullet.collision.btDefaultCollisionConfiguration;
 import com.badlogic.gdx.physics.bullet.collision.btDispatcherInfo;
 import com.badlogic.gdx.physics.bullet.collision.btManifoldResult;
 import com.badlogic.gdx.physics.bullet.collision.btSphereShape;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.ArrayMap;
 import com.badlogic.gdx.utils.Disposable;
+import com.mygdx.gdx1.BulletTuto.GameObject.Constructor;
 
 public class BulletTuto implements Screen {
     static class GameObject extends ModelInstance implements Disposable {
@@ -73,19 +79,16 @@ public class BulletTuto implements Screen {
     PerspectiveCamera cam;
     CameraInputController camController;
     ModelBatch modelBatch;
-    Array<ModelInstance> instances;
+	Array<GameObject> instances;
 	Environment environment;
 	private Model model;
-	private ModelInstance ground;
-	private ModelInstance ball;
-	private boolean collision;
 
     btCollisionShape groundShape;
 	btCollisionShape ballShape;
-	private btCollisionObject groundObject;
-	private btCollisionObject ballObject;
 	private btDefaultCollisionConfiguration collisionConfig;
 	private btCollisionDispatcher dispatcher;
+	private ArrayMap<String, Constructor> constructors;
+	private float spawnTimer;
 
 	@Override
 	public void show() {
@@ -106,44 +109,44 @@ public class BulletTuto implements Screen {
 		camController = new CameraInputController(cam);
 		Gdx.input.setInputProcessor(camController);
 
-        instances = new Array<ModelInstance>();
 
 		// Build objects (models)
-        ModelBuilder mb = new ModelBuilder();
+		ModelBuilder mb = new ModelBuilder();
         mb.begin();
         mb.node().id = "ground";
-        mb.part("box", GL20.GL_TRIANGLES, Usage.Position | Usage.Normal, new Material(ColorAttribute.createDiffuse(Color.RED)))
+        mb.part("ground", GL20.GL_TRIANGLES, Usage.Position | Usage.Normal, new Material(ColorAttribute.createDiffuse(Color.RED)))
             .box(5f, 1f, 5f);
-        mb.node().id = "ball";
+        mb.node().id = "sphere";
         mb.part("sphere", GL20.GL_TRIANGLES, Usage.Position | Usage.Normal, new Material(ColorAttribute.createDiffuse(Color.GREEN)))
             .sphere(1f, 1f, 1f, 10, 10);
+        mb.node().id = "box";
+        mb.part("box", GL20.GL_TRIANGLES, Usage.Position | Usage.Normal, new Material(ColorAttribute.createDiffuse(Color.BLUE)))
+            .box(1f, 1f, 1f);
+        mb.node().id = "cone";
+        mb.part("cone", GL20.GL_TRIANGLES, Usage.Position | Usage.Normal, new Material(ColorAttribute.createDiffuse(Color.YELLOW)))
+            .cone(1f, 2f, 1f, 10);
+        mb.node().id = "capsule";
+        mb.part("capsule", GL20.GL_TRIANGLES, Usage.Position | Usage.Normal, new Material(ColorAttribute.createDiffuse(Color.CYAN)))
+            .capsule(0.5f, 2f, 10);
+        mb.node().id = "cylinder";
+        mb.part("cylinder", GL20.GL_TRIANGLES, Usage.Position | Usage.Normal, new Material(ColorAttribute.createDiffuse(Color.MAGENTA)))
+            .cylinder(1f, 2f, 1f, 10);
         model = mb.end();
 
-        ground = new ModelInstance(model, "ground");
-        ball = new ModelInstance(model, "ball");
-        ball.transform.setToTranslation(0, 9f, 0);
+        constructors = new ArrayMap<String, GameObject.Constructor>(String.class, GameObject.Constructor.class);
+        constructors.put("ground", new GameObject.Constructor(model, "ground", new btBoxShape(new Vector3(2.5f, 0.5f, 2.5f))));
+        constructors.put("sphere", new GameObject.Constructor(model, "sphere", new btSphereShape(0.5f)));
+        constructors.put("box", new GameObject.Constructor(model, "box", new btBoxShape(new Vector3(0.5f, 0.5f, 0.5f))));
+        constructors.put("cone", new GameObject.Constructor(model, "cone", new btConeShape(0.5f, 2f)));
+        constructors.put("capsule", new GameObject.Constructor(model, "capsule", new btCapsuleShape(.5f, 1f)));
+        constructors.put("cylinder", new GameObject.Constructor(model, "cylinder", new btCylinderShape(new Vector3(.5f, 1f, .5f))));
 
-        instances = new Array<ModelInstance>();
-        instances.add(ground);
-        instances.add(ball);
-		
-		// Bullet
-        ballShape = new btSphereShape(0.5f);
-        groundShape = new btBoxShape(new Vector3(2.5f, 0.5f, 2.5f));
+        instances = new Array<GameObject>();
+        instances.add(constructors.get("ground").construct());
 
-		// BUllet collisin objects
-        groundObject = new btCollisionObject();
-        groundObject.setCollisionShape(groundShape);
-        groundObject.setWorldTransform(ground.transform);
-
-        ballObject = new btCollisionObject();
-        ballObject.setCollisionShape(ballShape);
-        ballObject.setWorldTransform(ball.transform);
-
-		// Collision config
         collisionConfig = new btDefaultCollisionConfiguration();
         dispatcher = new btCollisionDispatcher(collisionConfig);
-	}
+}
 
     boolean checkCollision(btCollisionObject obj0, btCollisionObject obj1) {
         CollisionObjectWrapper co0 = new CollisionObjectWrapper(obj0);
@@ -165,13 +168,30 @@ public class BulletTuto implements Screen {
         return r;
     }
 
+    public void spawn() {
+        GameObject obj = constructors.values[1+MathUtils.random(constructors.size-2)].construct();
+        obj.moving = true;
+        obj.transform.setFromEulerAngles(MathUtils.random(360f), MathUtils.random(360f), MathUtils.random(360f));
+        obj.transform.trn(MathUtils.random(-2.5f, 2.5f), 9f, MathUtils.random(-2.5f, 2.5f));
+        obj.body.setWorldTransform(obj.transform);
+        instances.add(obj);
+    }
+
 	@Override
 	public void render(float delta) {
 		delta = Math.min(1f/30f, Gdx.graphics.getDeltaTime());
-        if (!collision) {
-            ball.transform.translate(0f, -delta, 0f);
-            ballObject.setWorldTransform(ball.transform);
-            collision = checkCollision(ballObject, groundObject);
+        for (GameObject obj : instances) {
+            if (obj.moving) {
+                obj.transform.trn(0f, -delta, 0f);
+                obj.body.setWorldTransform(obj.transform);
+                if (checkCollision(obj.body, instances.get(0).body))
+                    obj.moving = false;
+            }
+        }
+
+        if ((spawnTimer -= delta) < 0) {
+            spawn();
+            spawnTimer = 1.5f;
         }
         camController.update();
 
@@ -184,16 +204,19 @@ public class BulletTuto implements Screen {
 	}
     @Override
 	public void dispose () {
-        groundObject.dispose();
-        groundShape.dispose();
+        for (GameObject obj : instances)
+            obj.dispose();
+        instances.clear();
 
-        ballObject.dispose();
-        ballShape.dispose();
+        for (GameObject.Constructor ctor : constructors.values())
+            ctor.dispose();
+        constructors.clear();
 
         dispatcher.dispose();
         collisionConfig.dispose();
-		modelBatch.dispose();
-		model.dispose();
+
+        modelBatch.dispose();
+        model.dispose();
 	}
     @Override public void pause () {}
     @Override public void resume () {}
