@@ -25,16 +25,19 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.bullet.Bullet;
 import com.badlogic.gdx.physics.bullet.collision.CollisionObjectWrapper;
+import com.badlogic.gdx.physics.bullet.collision.ContactListener;
 import com.badlogic.gdx.physics.bullet.collision.btBoxShape;
 import com.badlogic.gdx.physics.bullet.collision.btCapsuleShape;
 import com.badlogic.gdx.physics.bullet.collision.btCollisionAlgorithm;
 import com.badlogic.gdx.physics.bullet.collision.btCollisionDispatcher;
 import com.badlogic.gdx.physics.bullet.collision.btCollisionObject;
+import com.badlogic.gdx.physics.bullet.collision.btCollisionObjectWrapper;
 import com.badlogic.gdx.physics.bullet.collision.btCollisionShape;
 import com.badlogic.gdx.physics.bullet.collision.btConeShape;
 import com.badlogic.gdx.physics.bullet.collision.btCylinderShape;
 import com.badlogic.gdx.physics.bullet.collision.btDefaultCollisionConfiguration;
 import com.badlogic.gdx.physics.bullet.collision.btDispatcherInfo;
+import com.badlogic.gdx.physics.bullet.collision.btManifoldPoint;
 import com.badlogic.gdx.physics.bullet.collision.btManifoldResult;
 import com.badlogic.gdx.physics.bullet.collision.btSphereShape;
 import com.badlogic.gdx.utils.Array;
@@ -76,6 +79,17 @@ public class BulletTuto implements Screen {
             }
         }
     }
+    class MyContactListener extends ContactListener {
+        @Override
+        public boolean onContactAdded (btManifoldPoint cp, btCollisionObjectWrapper colObj0Wrap, int partId0, int index0,
+            btCollisionObjectWrapper colObj1Wrap, int partId1, int index1) {
+            instances.get(colObj0Wrap.getCollisionObject().getUserValue()).moving = false;
+            instances.get(colObj1Wrap.getCollisionObject().getUserValue()).moving = false;
+            return true;
+        }
+    }
+
+	MyContactListener contactListener;
     PerspectiveCamera cam;
     CameraInputController camController;
     ModelBatch modelBatch;
@@ -146,7 +160,9 @@ public class BulletTuto implements Screen {
 
         collisionConfig = new btDefaultCollisionConfiguration();
         dispatcher = new btCollisionDispatcher(collisionConfig);
-}
+
+        contactListener = new MyContactListener();
+	}
 
     boolean checkCollision(btCollisionObject obj0, btCollisionObject obj1) {
         CollisionObjectWrapper co0 = new CollisionObjectWrapper(obj0);
@@ -174,6 +190,9 @@ public class BulletTuto implements Screen {
         obj.transform.setFromEulerAngles(MathUtils.random(360f), MathUtils.random(360f), MathUtils.random(360f));
         obj.transform.trn(MathUtils.random(-2.5f, 2.5f), 9f, MathUtils.random(-2.5f, 2.5f));
         obj.body.setWorldTransform(obj.transform);
+        obj.body.setUserValue(instances.size);
+		// we also inform Bullet that we want to receive collision events for this object by adding the CF_CUSTOM_MATERIAL_CALLBACK flag. This flag is required for the onContactAdded method to be called.
+        obj.body.setCollisionFlags(obj.body.getCollisionFlags() | btCollisionObject.CollisionFlags.CF_CUSTOM_MATERIAL_CALLBACK);
         instances.add(obj);
     }
 
@@ -193,6 +212,15 @@ public class BulletTuto implements Screen {
             spawn();
             spawnTimer = 1.5f;
         }
+
+        for (GameObject obj : instances) {
+            if (obj.moving) {
+                obj.transform.trn(0f, -delta, 0f);
+                obj.body.setWorldTransform(obj.transform);
+                checkCollision(obj.body, instances.get(0).body);
+            }
+        }
+
         camController.update();
 
         Gdx.gl.glClearColor(0.3f, 0.3f, 0.3f, 1.f);
@@ -217,6 +245,8 @@ public class BulletTuto implements Screen {
 
         modelBatch.dispose();
         model.dispose();
+
+		contactListener.dispose();
 	}
     @Override public void pause () {}
     @Override public void resume () {}
