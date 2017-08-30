@@ -104,6 +104,10 @@ public class BulletTuto implements Screen {
     btBroadphaseInterface broadphase;
     btCollisionWorld collisionWorld;
 
+    final static short GROUND_FLAG = 1<<8;
+    final static short OBJECT_FLAG = 1<<9;
+    final static short ALL_FLAG = -1;
+
 	@Override
 	public void show() {
 		// Neccessary to use bullet
@@ -165,7 +169,7 @@ public class BulletTuto implements Screen {
         instances = new Array<GameObject>();
         GameObject object = constructors.get("ground").construct();
         instances.add(object);
-        collisionWorld.addCollisionObject(object.body);
+        collisionWorld.addCollisionObject(object.body, GROUND_FLAG, ALL_FLAG);
 	}
 
 
@@ -179,7 +183,7 @@ public class BulletTuto implements Screen {
 		// we also inform Bullet that we want to receive collision events for this object by adding the CF_CUSTOM_MATERIAL_CALLBACK flag. This flag is required for the onContactAdded method to be called.
         obj.body.setCollisionFlags(obj.body.getCollisionFlags() | btCollisionObject.CollisionFlags.CF_CUSTOM_MATERIAL_CALLBACK);
         instances.add(obj);
-        collisionWorld.addCollisionObject(obj.body);
+        collisionWorld.addCollisionObject(obj.body, OBJECT_FLAG, GROUND_FLAG);
     }
 
 	@Override
