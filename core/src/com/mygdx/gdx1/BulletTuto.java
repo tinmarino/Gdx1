@@ -31,7 +31,6 @@ import com.badlogic.gdx.physics.bullet.collision.btCapsuleShape;
 import com.badlogic.gdx.physics.bullet.collision.btCollisionAlgorithm;
 import com.badlogic.gdx.physics.bullet.collision.btCollisionDispatcher;
 import com.badlogic.gdx.physics.bullet.collision.btCollisionObject;
-import com.badlogic.gdx.physics.bullet.collision.btCollisionObjectWrapper;
 import com.badlogic.gdx.physics.bullet.collision.btCollisionShape;
 import com.badlogic.gdx.physics.bullet.collision.btConeShape;
 import com.badlogic.gdx.physics.bullet.collision.btCylinderShape;
@@ -80,10 +79,9 @@ public class BulletTuto implements Screen {
     }
     class MyContactListener extends ContactListener {
         @Override
-        public boolean onContactAdded (btCollisionObjectWrapper colObj0Wrap, int partId0, int index0,
-            btCollisionObjectWrapper colObj1Wrap, int partId1, int index1) {
-            instances.get(colObj0Wrap.getCollisionObject().getUserValue()).moving = false;
-            instances.get(colObj1Wrap.getCollisionObject().getUserValue()).moving = false;
+        public boolean onContactAdded (int userValue0, int partId0, int index0, int userValue1, int partId1, int index1) {
+            instances.get(userValue0).moving = false;
+            instances.get(userValue1).moving = false;
             return true;
         }
     }
