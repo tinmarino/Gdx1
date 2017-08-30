@@ -3,6 +3,7 @@
  * C++ Wrapper so many disposable objects (in C++ no garbage collection)
  * The result of this collision detection is called a manifold, which contains the contact points (if any) of the collision. These contact points contain information over the collision, for example the distance (penetration) and direction of the collision.
  * I've modified the checkCollision signature a bit so that it can be used for any pair of collision objects. Instead of manually creating a sphere-box collision algorithm, we now ask the dispatcher to find the correct algorithm for us using the dispatcher.findAlgorithm method. The rest of the method is pretty much the same as before. Except for one thing: we don't own the algorithm anymore, so we don't have to dispose it anymore. Instead we need to inform the dispatcher that we're done with the algorithm so that it can be reused (pooled) for other collision detection. For this the dispatcher needs to now the location in memory of the algorithm. As we've seen earlier, we can use the getCPointer method to get this location.
+ *  "axis aligned bounding box tree" or in short "AABB tree"
 */
 package com.mygdx.gdx1;
 
@@ -24,19 +25,18 @@ import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.bullet.Bullet;
-import com.badlogic.gdx.physics.bullet.collision.CollisionObjectWrapper;
 import com.badlogic.gdx.physics.bullet.collision.ContactListener;
 import com.badlogic.gdx.physics.bullet.collision.btBoxShape;
+import com.badlogic.gdx.physics.bullet.collision.btBroadphaseInterface;
 import com.badlogic.gdx.physics.bullet.collision.btCapsuleShape;
-import com.badlogic.gdx.physics.bullet.collision.btCollisionAlgorithm;
 import com.badlogic.gdx.physics.bullet.collision.btCollisionDispatcher;
 import com.badlogic.gdx.physics.bullet.collision.btCollisionObject;
 import com.badlogic.gdx.physics.bullet.collision.btCollisionShape;
+import com.badlogic.gdx.physics.bullet.collision.btCollisionWorld;
 import com.badlogic.gdx.physics.bullet.collision.btConeShape;
 import com.badlogic.gdx.physics.bullet.collision.btCylinderShape;
+import com.badlogic.gdx.physics.bullet.collision.btDbvtBroadphase;
 import com.badlogic.gdx.physics.bullet.collision.btDefaultCollisionConfiguration;
-import com.badlogic.gdx.physics.bullet.collision.btDispatcherInfo;
-import com.badlogic.gdx.physics.bullet.collision.btManifoldResult;
 import com.badlogic.gdx.physics.bullet.collision.btSphereShape;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ArrayMap;
@@ -101,6 +101,9 @@ public class BulletTuto implements Screen {
 	private ArrayMap<String, Constructor> constructors;
 	private float spawnTimer;
 
+    btBroadphaseInterface broadphase;
+    btCollisionWorld collisionWorld;
+
 	@Override
 	public void show() {
 		// Neccessary to use bullet
@@ -152,34 +155,19 @@ public class BulletTuto implements Screen {
         constructors.put("capsule", new GameObject.Constructor(model, "capsule", new btCapsuleShape(.5f, 1f)));
         constructors.put("cylinder", new GameObject.Constructor(model, "cylinder", new btCylinderShape(new Vector3(.5f, 1f, .5f))));
 
-        instances = new Array<GameObject>();
-        instances.add(constructors.get("ground").construct());
-
+		// Create Collision World
         collisionConfig = new btDefaultCollisionConfiguration();
         dispatcher = new btCollisionDispatcher(collisionConfig);
-
+        broadphase = new btDbvtBroadphase();
+        collisionWorld = new btCollisionWorld(dispatcher, broadphase, collisionConfig);
         contactListener = new MyContactListener();
+
+        instances = new Array<GameObject>();
+        GameObject object = constructors.get("ground").construct();
+        instances.add(object);
+        collisionWorld.addCollisionObject(object.body);
 	}
 
-    boolean checkCollision(btCollisionObject obj0, btCollisionObject obj1) {
-        CollisionObjectWrapper co0 = new CollisionObjectWrapper(obj0);
-        CollisionObjectWrapper co1 = new CollisionObjectWrapper(obj1);
-
-        btCollisionAlgorithm algorithm = dispatcher.findAlgorithm(co0.wrapper, co1.wrapper);
-        btDispatcherInfo info = new btDispatcherInfo();
-        btManifoldResult result = new btManifoldResult(co0.wrapper, co1.wrapper);
-        algorithm.processCollision(co0.wrapper, co1.wrapper, info, result);
-        boolean r = result.getPersistentManifold().getNumContacts() > 0;
-
-        dispatcher.freeCollisionAlgorithm(algorithm.getCPointer());
-        result.dispose();
-        info.dispose();
-        algorithm.dispose();
-        co1.dispose();
-        co0.dispose();
-
-        return r;
-    }
 
     public void spawn() {
         GameObject obj = constructors.values[1+MathUtils.random(constructors.size-2)].construct();
@@ -191,6 +179,7 @@ public class BulletTuto implements Screen {
 		// we also inform Bullet that we want to receive collision events for this object by adding the CF_CUSTOM_MATERIAL_CALLBACK flag. This flag is required for the onContactAdded method to be called.
         obj.body.setCollisionFlags(obj.body.getCollisionFlags() | btCollisionObject.CollisionFlags.CF_CUSTOM_MATERIAL_CALLBACK);
         instances.add(obj);
+        collisionWorld.addCollisionObject(obj.body);
     }
 
 	@Override
@@ -200,10 +189,10 @@ public class BulletTuto implements Screen {
             if (obj.moving) {
                 obj.transform.trn(0f, -delta, 0f);
                 obj.body.setWorldTransform(obj.transform);
-                if (checkCollision(obj.body, instances.get(0).body))
-                    obj.moving = false;
             }
         }
+
+        collisionWorld.performDiscreteCollisionDetection();
 
         if ((spawnTimer -= delta) < 0) {
             spawn();
@@ -214,7 +203,6 @@ public class BulletTuto implements Screen {
             if (obj.moving) {
                 obj.transform.trn(0f, -delta, 0f);
                 obj.body.setWorldTransform(obj.transform);
-                checkCollision(obj.body, instances.get(0).body);
             }
         }
 
@@ -244,6 +232,9 @@ public class BulletTuto implements Screen {
         model.dispose();
 
 		contactListener.dispose();
+
+		collisionWorld.dispose();
+		broadphase.dispose();
 	}
     @Override public void pause () {}
     @Override public void resume () {}
