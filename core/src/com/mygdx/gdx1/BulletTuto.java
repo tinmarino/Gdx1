@@ -2,6 +2,7 @@
  * Just like we did with Vector3 for the box shape, we can set the transform using the transform member of the ModelInstance. The wrapper translates this Matrix4 for us to bullet's equivalent btTransform. While this is easy to work with, you should keep in mind that the transform -as far as bullet is concerned- only contains a position and rotation. Any other transformation, like for example scaling, is not supported
  * C++ Wrapper so many disposable objects (in C++ no garbage collection)
  * The result of this collision detection is called a manifold, which contains the contact points (if any) of the collision. These contact points contain information over the collision, for example the distance (penetration) and direction of the collision.
+ * I've modified the checkCollision signature a bit so that it can be used for any pair of collision objects. Instead of manually creating a sphere-box collision algorithm, we now ask the dispatcher to find the correct algorithm for us using the dispatcher.findAlgorithm method. The rest of the method is pretty much the same as before. Except for one thing: we don't own the algorithm anymore, so we don't have to dispose it anymore. Instead we need to inform the dispatcher that we're done with the algorithm so that it can be reused (pooled) for other collision detection. For this the dispatcher needs to now the location in memory of the algorithm. As we've seen earlier, we can use the getCPointer method to get this location.
 */
 package com.mygdx.gdx1;
 
@@ -25,18 +26,50 @@ import com.badlogic.gdx.physics.bullet.Bullet;
 import com.badlogic.gdx.physics.bullet.collision.CollisionObjectWrapper;
 import com.badlogic.gdx.physics.bullet.collision.btBoxShape;
 import com.badlogic.gdx.physics.bullet.collision.btCollisionAlgorithm;
-import com.badlogic.gdx.physics.bullet.collision.btCollisionAlgorithmConstructionInfo;
 import com.badlogic.gdx.physics.bullet.collision.btCollisionDispatcher;
 import com.badlogic.gdx.physics.bullet.collision.btCollisionObject;
 import com.badlogic.gdx.physics.bullet.collision.btCollisionShape;
 import com.badlogic.gdx.physics.bullet.collision.btDefaultCollisionConfiguration;
 import com.badlogic.gdx.physics.bullet.collision.btDispatcherInfo;
 import com.badlogic.gdx.physics.bullet.collision.btManifoldResult;
-import com.badlogic.gdx.physics.bullet.collision.btSphereBoxCollisionAlgorithm;
 import com.badlogic.gdx.physics.bullet.collision.btSphereShape;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Disposable;
 
 public class BulletTuto implements Screen {
+    static class GameObject extends ModelInstance implements Disposable {
+        public final btCollisionObject body;
+        public boolean moving;
+        public GameObject(Model model, String node, btCollisionShape shape) {
+            super(model, node);
+            body = new btCollisionObject();
+            body.setCollisionShape(shape);
+        }
+
+        @Override
+        public void dispose () {
+            body.dispose();
+        }
+        static class Constructor implements Disposable {
+            public final Model model;
+            public final String node;
+            public final btCollisionShape shape;
+            public Constructor(Model model, String node, btCollisionShape shape) {
+                this.model = model;
+                this.node = node;
+                this.shape = shape;
+            }
+
+            public GameObject construct() {
+                return new GameObject(model, node, shape);
+            }
+
+            @Override
+            public void dispose () {
+                shape.dispose();
+            }
+        }
+    }
     PerspectiveCamera cam;
     CameraInputController camController;
     ModelBatch modelBatch;
@@ -112,25 +145,20 @@ public class BulletTuto implements Screen {
         dispatcher = new btCollisionDispatcher(collisionConfig);
 	}
 
-    boolean checkCollision() {
-        CollisionObjectWrapper co0 = new CollisionObjectWrapper(ballObject);
-        CollisionObjectWrapper co1 = new CollisionObjectWrapper(groundObject);
+    boolean checkCollision(btCollisionObject obj0, btCollisionObject obj1) {
+        CollisionObjectWrapper co0 = new CollisionObjectWrapper(obj0);
+        CollisionObjectWrapper co1 = new CollisionObjectWrapper(obj1);
 
-        btCollisionAlgorithmConstructionInfo ci = new btCollisionAlgorithmConstructionInfo();
-        ci.setDispatcher1(dispatcher);
-        btCollisionAlgorithm algorithm = new btSphereBoxCollisionAlgorithm(null, ci, co0.wrapper, co1.wrapper, false); 
-
+        btCollisionAlgorithm algorithm = dispatcher.findAlgorithm(co0.wrapper, co1.wrapper);
         btDispatcherInfo info = new btDispatcherInfo();
         btManifoldResult result = new btManifoldResult(co0.wrapper, co1.wrapper);
-
         algorithm.processCollision(co0.wrapper, co1.wrapper, info, result);
-
         boolean r = result.getPersistentManifold().getNumContacts() > 0;
 
+        dispatcher.freeCollisionAlgorithm(algorithm.getCPointer());
         result.dispose();
         info.dispose();
         algorithm.dispose();
-        ci.dispose();
         co1.dispose();
         co0.dispose();
 
@@ -143,7 +171,7 @@ public class BulletTuto implements Screen {
         if (!collision) {
             ball.transform.translate(0f, -delta, 0f);
             ballObject.setWorldTransform(ball.transform);
-            collision = checkCollision();
+            collision = checkCollision(ballObject, groundObject);
         }
         camController.update();
 
