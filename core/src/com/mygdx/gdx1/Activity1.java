@@ -21,7 +21,8 @@ public class Activity1 extends Game{
 
 		// For android back key
 		Gdx.input.setCatchBackKey(true);
-		this.screen = new MenuScreen(this);
+		// this.screen = new MenuScreen(this);
+		this.screen = new BulletTuto();
 		this.screen.show();
 	}
 
