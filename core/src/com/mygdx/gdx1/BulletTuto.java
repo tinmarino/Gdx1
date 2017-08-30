@@ -2,14 +2,19 @@ package com.mygdx.gdx1;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
+import com.badlogic.gdx.graphics.VertexAttributes.Usage;
 import com.badlogic.gdx.graphics.g3d.Environment;
+import com.badlogic.gdx.graphics.g3d.Material;
+import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
+import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.utils.Array;
 
 public class BulletTuto implements Screen {
@@ -17,7 +22,10 @@ public class BulletTuto implements Screen {
     CameraInputController camController;
     ModelBatch modelBatch;
     Array<ModelInstance> instances;
-    Environment environment;
+	Environment environment;
+	private Model model;
+	private ModelInstance ground;
+	private ModelInstance ball;
 
 	@Override
 	public void show() {
@@ -36,6 +44,25 @@ public class BulletTuto implements Screen {
         Gdx.input.setInputProcessor(camController);
 
         instances = new Array<ModelInstance>();
+
+		// Build objects (models)
+        ModelBuilder mb = new ModelBuilder();
+        mb.begin();
+        mb.node().id = "ground";
+        mb.part("box", GL20.GL_TRIANGLES, Usage.Position | Usage.Normal, new Material(ColorAttribute.createDiffuse(Color.RED)))
+            .box(5f, 1f, 5f);
+        mb.node().id = "ball";
+        mb.part("sphere", GL20.GL_TRIANGLES, Usage.Position | Usage.Normal, new Material(ColorAttribute.createDiffuse(Color.GREEN)))
+            .sphere(1f, 1f, 1f, 10, 10);
+        model = mb.end();
+
+        ground = new ModelInstance(model, "ground");
+        ball = new ModelInstance(model, "ball");
+        ball.transform.setToTranslation(0, 9f, 0);
+
+        instances = new Array<ModelInstance>();
+        instances.add(ground);
+        instances.add(ball);
 	}
 
 	@Override
@@ -52,6 +79,7 @@ public class BulletTuto implements Screen {
     @Override
 	public void dispose () {
 		modelBatch.dispose();
+		model.dispose();
 	}
     @Override public void pause () {}
     @Override public void resume () {}
