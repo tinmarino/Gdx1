@@ -145,6 +145,8 @@ public class BulletTuto2 implements Screen {
     btDynamicsWorld dynamicsWorld;
     btConstraintSolver constraintSolver;
 
+    float angle, speed = 90f;
+
 	@Override
 	public void show() {
 		// Neccessary to use bullet
@@ -210,6 +212,7 @@ public class BulletTuto2 implements Screen {
         dynamicsWorld.addRigidBody(object.body);
         object.body.setContactCallbackFlag(GROUND_FLAG);
         object.body.setContactCallbackFilter(0);
+        object.body.setCollisionFlags(object.body.getCollisionFlags() | btCollisionObject.CollisionFlags.CF_KINEMATIC_OBJECT);
 	}
 
 
@@ -229,6 +232,10 @@ public class BulletTuto2 implements Screen {
 	@Override
 	public void render(float delta) {
 		delta = Math.min(1f/30f, Gdx.graphics.getDeltaTime());
+
+        angle = (angle + delta * speed) % 360f;
+        instances.get(0).transform.setTranslation(0, MathUtils.sinDeg(angle) * 2.5f, 0f);
+        instances.get(0).body.setWorldTransform(instances.get(0).transform);
 
         dynamicsWorld.stepSimulation(delta, 5, 1f/60f);
 
