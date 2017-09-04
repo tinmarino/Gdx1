@@ -20,6 +20,7 @@ import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.bullet.Bullet;
 import com.badlogic.gdx.physics.bullet.collision.ContactListener;
@@ -40,6 +41,7 @@ import com.badlogic.gdx.physics.bullet.dynamics.btDiscreteDynamicsWorld;
 import com.badlogic.gdx.physics.bullet.dynamics.btDynamicsWorld;
 import com.badlogic.gdx.physics.bullet.dynamics.btRigidBody;
 import com.badlogic.gdx.physics.bullet.dynamics.btSequentialImpulseConstraintSolver;
+import com.badlogic.gdx.physics.bullet.linearmath.btMotionState;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ArrayMap;
 import com.badlogic.gdx.utils.Disposable;
@@ -48,16 +50,20 @@ import com.mygdx.gdx1.BulletTuto2.GameObject.Constructor;
 public class BulletTuto2 implements Screen {
 	static class GameObject extends ModelInstance implements Disposable {
 		public final btRigidBody body;
-		public boolean moving;
+		private MyMotionState motionState;
 
 		public GameObject (Model model, String node, btRigidBody.btRigidBodyConstructionInfo constructionInfo) {
-			super(model, node);
-			body = new btRigidBody(constructionInfo);
+            super(model, node);
+            motionState = new MyMotionState();
+            motionState.transform = transform;
+            body = new btRigidBody(constructionInfo);
+            body.setMotionState(motionState);
 		}
 
 		@Override
 		public void dispose () {
 			body.dispose();
+			motionState.dispose();
 		}
 
 		static class Constructor implements Disposable {
@@ -92,9 +98,22 @@ public class BulletTuto2 implements Screen {
     class MyContactListener extends ContactListener {
         @Override
         public boolean onContactAdded (int userValue0, int partId0, int index0, int userValue1, int partId1, int index1) {
-            instances.get(userValue0).moving = false;
-            instances.get(userValue1).moving = false;
+            if (userValue0 != 0)
+                ((ColorAttribute)instances.get(userValue0).materials.get(0).get(ColorAttribute.Diffuse)).color.set(Color.WHITE);
+            if (userValue1 != 0)
+                ((ColorAttribute)instances.get(userValue1).materials.get(0).get(ColorAttribute.Diffuse)).color.set(Color.WHITE);
             return true;
+        }
+    }
+    static class MyMotionState extends btMotionState {
+        Matrix4 transform;
+        @Override
+        public void getWorldTransform (Matrix4 worldTrans) {
+            worldTrans.set(transform);
+        }
+        @Override
+        public void setWorldTransform (Matrix4 worldTrans) {
+            transform.set(worldTrans);
         }
     }
 
@@ -195,7 +214,7 @@ public class BulletTuto2 implements Screen {
         GameObject obj = constructors.values[1 + MathUtils.random(constructors.size - 2)].construct();
         obj.transform.setFromEulerAngles(MathUtils.random(360f), MathUtils.random(360f), MathUtils.random(360f));
         obj.transform.trn(MathUtils.random(-2.5f, 2.5f), 9f, MathUtils.random(-2.5f, 2.5f));
-        obj.body.setWorldTransform(obj.transform);
+        obj.body.proceedToTransform(obj.transform);
         obj.body.setUserValue(instances.size);
         obj.body.setCollisionFlags(obj.body.getCollisionFlags() | btCollisionObject.CollisionFlags.CF_CUSTOM_MATERIAL_CALLBACK);
         instances.add(obj);
@@ -208,24 +227,9 @@ public class BulletTuto2 implements Screen {
 
         dynamicsWorld.stepSimulation(delta, 5, 1f/60f);
 
-        for (GameObject obj : instances) {
-			obj.body.getWorldTransform(obj.transform);
-            if (obj.moving) {
-                obj.transform.trn(0f, -delta, 0f);
-                obj.body.setWorldTransform(obj.transform);
-            }
-        }
-
         if ((spawnTimer -= delta) < 0) {
             spawn();
             spawnTimer = 1.5f;
-        }
-
-        for (GameObject obj : instances) {
-            if (obj.moving) {
-                obj.transform.trn(0f, -delta, 0f);
-                obj.body.setWorldTransform(obj.transform);
-            }
         }
 
         camController.update();
