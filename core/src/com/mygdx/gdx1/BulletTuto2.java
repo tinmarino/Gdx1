@@ -96,14 +96,15 @@ public class BulletTuto2 implements Screen {
 		}
 	}
     class MyContactListener extends ContactListener {
-        @Override
-        public boolean onContactAdded (int userValue0, int partId0, int index0, int userValue1, int partId1, int index1) {
-            if (userValue0 != 0)
-                ((ColorAttribute)instances.get(userValue0).materials.get(0).get(ColorAttribute.Diffuse)).color.set(Color.WHITE);
-            if (userValue1 != 0)
-                ((ColorAttribute)instances.get(userValue1).materials.get(0).get(ColorAttribute.Diffuse)).color.set(Color.WHITE);
-            return true;
-        }
+		@Override
+		public boolean onContactAdded (int userValue0, int partId0, int index0, boolean match0, 
+						int userValue1, int partId1, int index1, boolean match1) {
+			if (match0)
+				((ColorAttribute)instances.get(userValue0).materials.get(0).get(ColorAttribute.Diffuse)).color.set(Color.WHITE);
+			if (match1)
+				((ColorAttribute)instances.get(userValue1).materials.get(0).get(ColorAttribute.Diffuse)).color.set(Color.WHITE);
+			return true;
+		}
     }
     static class MyMotionState extends btMotionState {
         Matrix4 transform;
@@ -206,7 +207,9 @@ public class BulletTuto2 implements Screen {
         instances = new Array<GameObject>();
         GameObject object = constructors.get("ground").construct();
         instances.add(object);
-        dynamicsWorld.addRigidBody(object.body, GROUND_FLAG, ALL_FLAG);
+        dynamicsWorld.addRigidBody(object.body);
+        object.body.setContactCallbackFlag(GROUND_FLAG);
+        object.body.setContactCallbackFilter(0);
 	}
 
 
@@ -218,7 +221,9 @@ public class BulletTuto2 implements Screen {
         obj.body.setUserValue(instances.size);
         obj.body.setCollisionFlags(obj.body.getCollisionFlags() | btCollisionObject.CollisionFlags.CF_CUSTOM_MATERIAL_CALLBACK);
         instances.add(obj);
-        dynamicsWorld.addRigidBody(obj.body, OBJECT_FLAG, GROUND_FLAG);
+        dynamicsWorld.addRigidBody(obj.body);
+        obj.body.setContactCallbackFlag(OBJECT_FLAG);
+        obj.body.setContactCallbackFilter(GROUND_FLAG);
     }
 
 	@Override
