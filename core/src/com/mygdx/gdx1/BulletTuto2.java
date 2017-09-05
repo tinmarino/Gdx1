@@ -1,6 +1,7 @@
 
 /* 
  *zero mass isn't physically possible. It is used to indicate that the ground should not respond to any forces applied to it. It should always stay at the same location (and rotation), regardless of any forces or collisions that may apply to it. This is called a "static" object. The other objects (with a mass greater than zero) are called "dynamic" objects.
+  Be careful: as long as a kinematic body is active, the getWorldTransform method of its motion state is called every time. You should only keep the body activated if you're actually moving or rotating it.
 */
 package com.mygdx.gdx1;
 
@@ -23,6 +24,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.bullet.Bullet;
+import com.badlogic.gdx.physics.bullet.collision.Collision;
 import com.badlogic.gdx.physics.bullet.collision.ContactListener;
 import com.badlogic.gdx.physics.bullet.collision.btBoxShape;
 import com.badlogic.gdx.physics.bullet.collision.btBroadphaseInterface;
@@ -213,6 +215,7 @@ public class BulletTuto2 implements Screen {
         object.body.setContactCallbackFlag(GROUND_FLAG);
         object.body.setContactCallbackFilter(0);
         object.body.setCollisionFlags(object.body.getCollisionFlags() | btCollisionObject.CollisionFlags.CF_KINEMATIC_OBJECT);
+        object.body.setActivationState(Collision.DISABLE_DEACTIVATION);
 	}
 
 
@@ -235,7 +238,6 @@ public class BulletTuto2 implements Screen {
 
         angle = (angle + delta * speed) % 360f;
         instances.get(0).transform.setTranslation(0, MathUtils.sinDeg(angle) * 2.5f, 0f);
-        instances.get(0).body.setWorldTransform(instances.get(0).transform);
 
         dynamicsWorld.stepSimulation(delta, 5, 1f/60f);
 

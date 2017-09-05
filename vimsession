@@ -2,10 +2,10 @@ let SessionLoad = 1
 if &cp | set nocp | endif
 let s:cpo_save=&cpo
 set cpo&vim
-inoremap <C-Space> 
-inoremap <expr> <Up> pumvisible() ? "\" : "\<Up>"
-inoremap <expr> <S-Tab> pumvisible() ? "\" : "\<S-Tab>"
 inoremap <expr> <Down> pumvisible() ? "\" : "\<Down>"
+inoremap <expr> <S-Tab> pumvisible() ? "\" : "\<S-Tab>"
+inoremap <expr> <Up> pumvisible() ? "\" : "\<Up>"
+inoremap <C-Space> 
 inoremap <silent> <C-F8> :RandomColorScheme
 inoremap <silent> <S-F8> :PrevColorScheme
 inoremap <silent> <F8> :NextColorScheme
@@ -21,6 +21,7 @@ vnoremap  "+y
 nnoremap  "+y
 vnoremap   zf
 nnoremap   za
+vmap ,s :w:so %
 nnoremap ,d :YcmShowDetailedDiagnostic
 nmap ,j <Plug>(CommandTJump)
 nnoremap <silent> ,p :call conque_gdb#print_word(expand("<cword>"))
@@ -31,7 +32,6 @@ nnoremap <silent> ,n :call conque_gdb#command("next")
 nnoremap <silent> ,r :call conque_gdb#command("run")
 map ,c :s,^\(\s*\)[^# \t]\@=,\1// ,gv
 map ,b :bp
-vmap ,s :w:so %
 omap ,s :w:so %
 map ,v :e ~/.vim/vimrc
 map ,0 :10b
@@ -73,8 +73,8 @@ map z3 :set foldlevel=3
 map z2 :set foldlevel=2
 map z1 :set foldlevel=1
 map z0 :set foldlevel=0
-nnoremap <SNR>63_: :=v:count ? v:count : ''
 nnoremap <SNR>64_: :=v:count ? v:count : ''
+nnoremap <SNR>63_: :=v:count ? v:count : ''
 vnoremap <silent> <Plug>NetrwBrowseXVis :call netrw#BrowseXVis()
 nnoremap <silent> <Plug>NetrwBrowseX :call netrw#BrowseX(expand((exists("g:netrw_gx")? g:netrw_gx : '<cfile>')),netrw#CheckIfRemote())
 nnoremap <SNR>67_: :=v:count ? v:count : ''
@@ -143,7 +143,7 @@ set undolevels=10000
 set updatetime=2000
 set wildcharm=26
 set wildmenu
-set window=53
+set window=54
 set nowritebackup
 let s:so_save = &so | let s:siso_save = &siso | set so=0 siso=0
 let v:this_session=expand("<sfile>:p")
@@ -153,14 +153,14 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +20 core/src/com/mygdx/gdx1/Activity1.java
+badd +23 core/src/com/mygdx/gdx1/Activity1.java
 badd +1 core/src/com/mygdx/gdx1/Basic3DTest.java
 badd +1 core/src/com/mygdx/gdx1/BehaviorTreeTest.java
 badd +1 core/src/com/mygdx/gdx1/BehindTheSceneTest.java
 badd +68 core/src/com/mygdx/gdx1/LoadModelTest.java
 badd +103 core/src/com/mygdx/gdx1/LoadSceneTest2.java
 badd +1 core/src/com/mygdx/gdx1/LoadSceneTest.java
-badd +72 core/src/com/mygdx/gdx1/ShaderTest.java
+badd +1 core/src/com/mygdx/gdx1/ShaderTest.java
 badd +1 core/src/com/mygdx/gdx1/HyperCube.java
 badd +125 core/src/com/mygdx/gdx1/BabyPony.java
 badd +23 ~/Software/Java/Libgdx/Jar/Git/gdx/src/com/badlogic/gdx/InputAdapter.java
@@ -189,7 +189,7 @@ badd +41 core/src/com/mygdx/gdx1/net/NetInput.java
 badd +15 html/src/com/mygdx/gdx1/GdxDefinition.gwt.xml
 badd +14 html/build.gradle
 badd +44 ~/Software/Java/Libgdx/Jar/Git/gdx/src/com/badlogic/gdx/Game.java
-badd +25 core/src/com/mygdx/gdx1/TestsNotGwt.java
+badd +34 core/src/com/mygdx/gdx1/TestsNotGwt.java
 badd +17 desktop/src/com/mygdx/gdx1/desktop/DesktopLauncher.java
 badd +13 html/src/com/mygdx/gdx1/client/HtmlLauncher.java
 badd +1 core/src/com/mygdx/gdx1/Networking.java
@@ -210,22 +210,31 @@ badd +20 android/AndroidManifest.xml
 badd +91 ~/Software/Java/Libgdx/Jar/Git/gdx/src/com/badlogic/gdx/scenes/scene2d/Stage.java
 badd +111 ~/Software/Java/Libgdx/Jar/Git/gdx/src/com/badlogic/gdx/scenes/scene2d/ui/ScrollPane.java
 badd +5 todo
-badd +13 android/assets/data/test.vertext.glsl
+badd +1 android/assets/data/test.vertext.glsl
 badd +9 android/assets/data/test.fragment.glsl
-badd +32 core/src/com/mygdx/gdx1/ShaderClass.java
+badd +48 core/src/com/mygdx/gdx1/ShaderClass.java
 badd +1 android/assets/data/test.vertex.glsl
+badd +35 core/src/com/mygdx/gdx1/MaterialTest.java
+badd +13 android/assets/data/test.vertext2.glsl
+badd +2 android/assets/data/test.fragment2.glsl
+badd +65 ~/Software/Java/Libgdx/Jar/Git/gdx/src/com/badlogic/gdx/graphics/g3d/Renderable.java
+badd +145 core/src/com/mygdx/gdx1/FrustumCullingTest.java
+badd +1 core/src/com/mygdx/gdx1/RayPickingTest.java
+badd +23 core/src/com/mygdx/gdx1/CollisionShape.java
+badd +1 core/src/com/mygdx/gdx1/BulletTuto.java
+badd +0 core/src/com/mygdx/gdx1/BulletTuto2.java
 argglobal
 silent! argdel *
 argadd core/src/com/mygdx/gdx1/Activity1.java
-argadd core/src/com/mygdx/gdx1/Basic3DTest.java
-argadd core/src/com/mygdx/gdx1/BehaviorTreeTest.java
-argadd core/src/com/mygdx/gdx1/BehindTheSceneTest.java
-argadd core/src/com/mygdx/gdx1/LoadModelTest.java
-argadd core/src/com/mygdx/gdx1/LoadSceneTest2.java
-argadd core/src/com/mygdx/gdx1/LoadSceneTest.java
-argadd core/src/com/mygdx/gdx1/Networking.java
 argadd core/src/com/mygdx/gdx1/ShaderTest.java
-edit core/src/com/mygdx/gdx1/ShaderClass.java
+argadd core/src/com/mygdx/gdx1/Networking.java
+argadd core/src/com/mygdx/gdx1/LoadSceneTest.java
+argadd core/src/com/mygdx/gdx1/LoadSceneTest2.java
+argadd core/src/com/mygdx/gdx1/LoadModelTest.java
+argadd core/src/com/mygdx/gdx1/BehindTheSceneTest.java
+argadd core/src/com/mygdx/gdx1/BehaviorTreeTest.java
+argadd core/src/com/mygdx/gdx1/Basic3DTest.java
+edit core/src/com/mygdx/gdx1/BulletTuto2.java
 set splitbelow splitright
 wincmd _ | wincmd |
 vsplit
@@ -233,19 +242,24 @@ vsplit
 wincmd w
 wincmd _ | wincmd |
 split
-1wincmd k
+wincmd _ | wincmd |
+split
+2wincmd k
+wincmd w
 wincmd w
 set nosplitbelow
 set nosplitright
 wincmd t
 set winheight=1 winwidth=1
-exe 'vert 1resize ' . ((&columns * 70 + 45) / 91)
-exe '2resize ' . ((&lines * 3 + 27) / 54)
-exe 'vert 2resize ' . ((&columns * 20 + 45) / 91)
-exe '3resize ' . ((&lines * 48 + 27) / 54)
-exe 'vert 3resize ' . ((&columns * 20 + 45) / 91)
+exe 'vert 1resize ' . ((&columns * 101 + 92) / 184)
+exe '2resize ' . ((&lines * 3 + 27) / 55)
+exe 'vert 2resize ' . ((&columns * 82 + 92) / 184)
+exe '3resize ' . ((&lines * 24 + 27) / 55)
+exe 'vert 3resize ' . ((&columns * 82 + 92) / 184)
+exe '4resize ' . ((&lines * 24 + 27) / 55)
+exe 'vert 4resize ' . ((&columns * 82 + 92) / 184)
 argglobal
-edit core/src/com/mygdx/gdx1/ShaderClass.java
+edit core/src/com/mygdx/gdx1/BulletTuto2.java
 inoreabbr <buffer> logger logger=eclim#java#logging#LoggingInit("logger")
 inoreabbr <buffer> log log=eclim#java#logging#LoggingInit("log")
 setlocal keymap=
@@ -356,20 +370,16 @@ setlocal textwidth=0
 setlocal thesaurus=
 setlocal undofile
 setlocal undolevels=-123456
-setlocal nowinfixheight
+setlocal winfixheight
 setlocal nowinfixwidth
 setlocal wrap
 setlocal wrapmargin=0
-13
-normal! zo
-23
-normal! zo
-let s:l = 52 - ((29 * winheight(0) + 26) / 52)
+let s:l = 4 - ((3 * winheight(0) + 26) / 53)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-52
-normal! 05|
+4
+normal! 0205|
 wincmd w
 argglobal
 enew
@@ -533,7 +543,7 @@ setlocal foldenable
 set foldexpr=FoldMethod(v:lnum)
 setlocal foldexpr=FoldMethod(v:lnum)
 setlocal foldignore=#
-set foldlevel=1
+set foldlevel=9
 setlocal foldlevel=30
 setlocal foldmarker={{{,}}}
 set foldmethod=expr
@@ -604,18 +614,143 @@ setlocal wrap
 setlocal wrapmargin=0
 13
 normal! zo
-let s:l = 25 - ((7 * winheight(0) + 24) / 48)
+31
+normal! zo
+let s:l = 27 - ((15 * winheight(0) + 12) / 24)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-25
-normal! 038|
+27
+normal! 05|
 wincmd w
-exe 'vert 1resize ' . ((&columns * 70 + 45) / 91)
-exe '2resize ' . ((&lines * 3 + 27) / 54)
-exe 'vert 2resize ' . ((&columns * 20 + 45) / 91)
-exe '3resize ' . ((&lines * 48 + 27) / 54)
-exe 'vert 3resize ' . ((&columns * 20 + 45) / 91)
+argglobal
+edit android/assets/data/test.fragment2.glsl
+setlocal keymap=
+setlocal noarabic
+setlocal autoindent
+setlocal backupcopy=
+setlocal balloonexpr=
+setlocal nobinary
+setlocal nobreakindent
+setlocal breakindentopt=
+setlocal bufhidden=
+setlocal buflisted
+setlocal buftype=
+setlocal nocindent
+setlocal cinkeys=0{,0},0),:,0#,!^F,o,O,e
+setlocal cinoptions=
+setlocal cinwords=if,else,while,do,for,switch
+setlocal colorcolumn=
+setlocal comments=:#
+setlocal commentstring=#\ %s
+setlocal complete=.,w,b,u,t,i
+setlocal concealcursor=
+setlocal conceallevel=0
+setlocal completefunc=youcompleteme#Complete
+setlocal nocopyindent
+setlocal cryptmethod=
+setlocal nocursorbind
+setlocal nocursorcolumn
+set cursorline
+setlocal cursorline
+setlocal define=
+setlocal dictionary=
+setlocal nodiff
+setlocal equalprg=
+setlocal errorformat=
+setlocal noexpandtab
+if &filetype != 'conf'
+setlocal filetype=conf
+endif
+setlocal fixendofline
+setlocal foldcolumn=0
+setlocal foldenable
+set foldexpr=FoldMethod(v:lnum)
+setlocal foldexpr=FoldMethod(v:lnum)
+setlocal foldignore=#
+set foldlevel=1
+setlocal foldlevel=30
+setlocal foldmarker={{{,}}}
+set foldmethod=expr
+setlocal foldmethod=expr
+setlocal foldminlines=1
+setlocal foldnestmax=20
+setlocal foldtext=foldtext()
+setlocal formatexpr=
+setlocal formatoptions=croql
+setlocal formatlistpat=^\\s*\\d\\+[\\]:.)}\\t\ ]\\s*
+setlocal grepprg=
+setlocal iminsert=2
+setlocal imsearch=2
+setlocal include=
+setlocal includeexpr=
+setlocal indentexpr=
+setlocal indentkeys=0{,0},:,0#,!^F,o,O,e
+setlocal noinfercase
+setlocal iskeyword=@,48-57,_,192-255
+setlocal keywordprg=
+setlocal nolinebreak
+setlocal nolisp
+setlocal lispwords=
+setlocal nolist
+setlocal makeprg=
+setlocal matchpairs=(:),{:},[:]
+setlocal modeline
+setlocal modifiable
+setlocal nrformats=bin,octal,hex
+set number
+setlocal number
+setlocal numberwidth=4
+setlocal omnifunc=
+setlocal path=
+setlocal nopreserveindent
+setlocal nopreviewwindow
+setlocal quoteescape=\\
+setlocal noreadonly
+setlocal norelativenumber
+setlocal norightleft
+setlocal rightleftcmd=search
+setlocal noscrollbind
+setlocal shiftwidth=4
+setlocal noshortname
+setlocal nosmartindent
+setlocal softtabstop=0
+setlocal nospell
+setlocal spellcapcheck=[.?!]\\_[\\])'\"\	\ ]\\+
+setlocal spellfile=
+setlocal spelllang=en
+setlocal statusline=
+setlocal suffixesadd=
+setlocal noswapfile
+setlocal synmaxcol=3000
+if &syntax != 'conf'
+setlocal syntax=conf
+endif
+setlocal tabstop=4
+setlocal tagcase=
+setlocal tags=
+setlocal textwidth=0
+setlocal thesaurus=
+setlocal undofile
+setlocal undolevels=-123456
+setlocal nowinfixheight
+setlocal nowinfixwidth
+setlocal wrap
+setlocal wrapmargin=0
+let s:l = 11 - ((10 * winheight(0) + 12) / 24)
+if s:l < 1 | let s:l = 1 | endif
+exe s:l
+normal! zt
+11
+normal! 014|
+wincmd w
+exe 'vert 1resize ' . ((&columns * 101 + 92) / 184)
+exe '2resize ' . ((&lines * 3 + 27) / 55)
+exe 'vert 2resize ' . ((&columns * 82 + 92) / 184)
+exe '3resize ' . ((&lines * 24 + 27) / 55)
+exe 'vert 3resize ' . ((&columns * 82 + 92) / 184)
+exe '4resize ' . ((&lines * 24 + 27) / 55)
+exe 'vert 4resize ' . ((&columns * 82 + 92) / 184)
 tabnext 1
 if exists('s:wipebuf')
   silent exe 'bwipe ' . s:wipebuf
