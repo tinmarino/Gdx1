@@ -18,6 +18,8 @@ public class Tests{
 
 	private static List<Class<? extends Screen>> classList = 
 		new ArrayList<Class<? extends Screen>>(Arrays.asList(
+		CardGame.class,
+		CardFinal.class,
 		GpsSpeed.class,
 		Compass.class,
 		UiColorTest.class,
