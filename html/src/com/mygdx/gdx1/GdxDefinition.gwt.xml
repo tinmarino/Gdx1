@@ -21,6 +21,9 @@
 	<!-- TODO, remove for relase, this sets compile only firefox-->
 	<set-property name="user.agent" value="gecko1_8"/>
 
+	<!-- Avoid script to shout -->
+	<set-configuration-property name='xsiframe.failIfScriptTag' value='FALSE'/>	
+
 	<!-- Allow reflection -->
 	<extend-configuration-property name="gdx.reflect.include" value="com.mygdx.gdx1" />
 	<extend-configuration-property name="gdx.reflect.exclude" value="com.mygdx.gdx1.TestsNotGwt" />

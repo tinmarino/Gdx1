@@ -9,6 +9,8 @@ import java.util.List;
 import com.badlogic.gdx.Screen;
 import com.mygdx.gdx1.bullet.BulletTestCollision;
 import com.mygdx.gdx1.bullet.HyperCube;
+import com.mygdx.gdx1.bullet.BulletTuto;
+import com.mygdx.gdx1.bullet.BulletTuto2;
 import com.mygdx.gdx1.net.NetInput;
 import com.mygdx.gdx1.net.Networking;
 
@@ -16,7 +18,7 @@ public class TestsNotGwt{
 
 	public static void fillClassList(List<Class<? extends Screen>> classList){
 		classList.addAll(Arrays.asList(
-
+			BulletTuto.class,
 			RayPickingTest.class,
 			FrustumCullingTest.class,
 			MaterialTest.class,

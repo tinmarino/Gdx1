@@ -1,11 +1,9 @@
-/*
- * Just like we did with Vector3 for the box shape, we can set the transform using the transform member of the ModelInstance. The wrapper translates this Matrix4 for us to bullet's equivalent btTransform. While this is easy to work with, you should keep in mind that the transform -as far as bullet is concerned- only contains a position and rotation. Any other transformation, like for example scaling, is not supported
- * C++ Wrapper so many disposable objects (in C++ no garbage collection)
- * The result of this collision detection is called a manifold, which contains the contact points (if any) of the collision. These contact points contain information over the collision, for example the distance (penetration) and direction of the collision.
- * I've modified the checkCollision signature a bit so that it can be used for any pair of collision objects. Instead of manually creating a sphere-box collision algorithm, we now ask the dispatcher to find the correct algorithm for us using the dispatcher.findAlgorithm method. The rest of the method is pretty much the same as before. Except for one thing: we don't own the algorithm anymore, so we don't have to dispose it anymore. Instead we need to inform the dispatcher that we're done with the algorithm so that it can be reused (pooled) for other collision detection. For this the dispatcher needs to now the location in memory of the algorithm. As we've seen earlier, we can use the getCPointer method to get this location.
- *  "axis aligned bounding box tree" or in short "AABB tree"
+
+/* 
+ *zero mass isn't physically possible. It is used to indicate that the ground should not respond to any forces applied to it. It should always stay at the same location (and rotation), regardless of any forces or collisions that may apply to it. This is called a "static" object. The other objects (with a mass greater than zero) are called "dynamic" objects.
+  Be careful: as long as a kinematic body is active, the getWorldTransform method of its motion state is called every time. You should only keep the body activated if you're actually moving or rotating it.
 */
-package com.mygdx.gdx1;
+package com.mygdx.gdx1.bullet;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
@@ -23,8 +21,10 @@ import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.bullet.Bullet;
+import com.badlogic.gdx.physics.bullet.collision.Collision;
 import com.badlogic.gdx.physics.bullet.collision.ContactListener;
 import com.badlogic.gdx.physics.bullet.collision.btBoxShape;
 import com.badlogic.gdx.physics.bullet.collision.btBroadphaseInterface;
@@ -38,51 +38,85 @@ import com.badlogic.gdx.physics.bullet.collision.btCylinderShape;
 import com.badlogic.gdx.physics.bullet.collision.btDbvtBroadphase;
 import com.badlogic.gdx.physics.bullet.collision.btDefaultCollisionConfiguration;
 import com.badlogic.gdx.physics.bullet.collision.btSphereShape;
+import com.badlogic.gdx.physics.bullet.dynamics.btConstraintSolver;
+import com.badlogic.gdx.physics.bullet.dynamics.btDiscreteDynamicsWorld;
+import com.badlogic.gdx.physics.bullet.dynamics.btDynamicsWorld;
+import com.badlogic.gdx.physics.bullet.dynamics.btRigidBody;
+import com.badlogic.gdx.physics.bullet.dynamics.btSequentialImpulseConstraintSolver;
+import com.badlogic.gdx.physics.bullet.linearmath.btMotionState;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ArrayMap;
 import com.badlogic.gdx.utils.Disposable;
-import com.mygdx.gdx1.BulletTuto.GameObject.Constructor;
+import com.mygdx.gdx1.bullet.BulletTuto2.GameObject.Constructor;
 
-public class BulletTuto implements Screen {
-    static class GameObject extends ModelInstance implements Disposable {
-        public final btCollisionObject body;
-        public boolean moving;
-        public GameObject(Model model, String node, btCollisionShape shape) {
+public class BulletTuto2 implements Screen {
+	static class GameObject extends ModelInstance implements Disposable {
+		public final btRigidBody body;
+		private MyMotionState motionState;
+
+		public GameObject (Model model, String node, btRigidBody.btRigidBodyConstructionInfo constructionInfo) {
             super(model, node);
-            body = new btCollisionObject();
-            body.setCollisionShape(shape);
-        }
+            motionState = new MyMotionState();
+            motionState.transform = transform;
+            body = new btRigidBody(constructionInfo);
+            body.setMotionState(motionState);
+		}
 
-        @Override
-        public void dispose () {
-            body.dispose();
-        }
-        static class Constructor implements Disposable {
-            public final Model model;
-            public final String node;
-            public final btCollisionShape shape;
-            public Constructor(Model model, String node, btCollisionShape shape) {
-                this.model = model;
-                this.node = node;
-                this.shape = shape;
-            }
+		@Override
+		public void dispose () {
+			body.dispose();
+			motionState.dispose();
+		}
 
-            public GameObject construct() {
-                return new GameObject(model, node, shape);
-            }
+		static class Constructor implements Disposable {
+			public final Model model;
+			public final String node;
+			public final btCollisionShape shape;
+			public final btRigidBody.btRigidBodyConstructionInfo constructionInfo;
+			private static Vector3 localInertia = new Vector3();
 
-            @Override
-            public void dispose () {
-                shape.dispose();
-            }
-        }
-    }
+			public Constructor (Model model, String node, btCollisionShape shape, float mass) {
+				this.model = model;
+				this.node = node;
+				this.shape = shape;
+				if (mass > 0f)
+					shape.calculateLocalInertia(mass, localInertia);
+				else
+					localInertia.set(0, 0, 0);
+				this.constructionInfo = new btRigidBody.btRigidBodyConstructionInfo(mass, null, shape, localInertia);
+			}
+
+			public GameObject construct () {
+				return new GameObject(model, node, constructionInfo);
+			}
+
+			@Override
+			public void dispose () {
+				shape.dispose();
+				constructionInfo.dispose();
+			}
+		}
+	}
     class MyContactListener extends ContactListener {
+		@Override
+		public boolean onContactAdded (int userValue0, int partId0, int index0, boolean match0, 
+						int userValue1, int partId1, int index1, boolean match1) {
+			if (match0)
+				((ColorAttribute)instances.get(userValue0).materials.get(0).get(ColorAttribute.Diffuse)).color.set(Color.WHITE);
+			if (match1)
+				((ColorAttribute)instances.get(userValue1).materials.get(0).get(ColorAttribute.Diffuse)).color.set(Color.WHITE);
+			return true;
+		}
+    }
+    static class MyMotionState extends btMotionState {
+        Matrix4 transform;
         @Override
-        public boolean onContactAdded (int userValue0, int partId0, int index0, int userValue1, int partId1, int index1) {
-            instances.get(userValue0).moving = false;
-            instances.get(userValue1).moving = false;
-            return true;
+        public void getWorldTransform (Matrix4 worldTrans) {
+            worldTrans.set(transform);
+        }
+        @Override
+        public void setWorldTransform (Matrix4 worldTrans) {
+            transform.set(worldTrans);
         }
     }
 
@@ -104,10 +138,16 @@ public class BulletTuto implements Screen {
     btBroadphaseInterface broadphase;
     btCollisionWorld collisionWorld;
 
+
 	// So, why did I start at the ninth bit and not the first? The answer is: just to be safe. Bullet uses internally a few bits, as described here. While this doesn't have to be a problem, it's generally better to use bits which aren't used for anything else. Note that the flags are short values, so the bits are relatively scarce, it is advised to choose them carefully.
     final static short GROUND_FLAG = 1<<8;
     final static short OBJECT_FLAG = 1<<9;
     final static short ALL_FLAG = -1;
+
+    btDynamicsWorld dynamicsWorld;
+    btConstraintSolver constraintSolver;
+
+    float angle, speed = 90f;
 
 	@Override
 	public void show() {
@@ -152,63 +192,58 @@ public class BulletTuto implements Screen {
             .cylinder(1f, 2f, 1f, 10);
         model = mb.end();
 
-        constructors = new ArrayMap<String, GameObject.Constructor>(String.class, GameObject.Constructor.class);
-        constructors.put("ground", new GameObject.Constructor(model, "ground", new btBoxShape(new Vector3(2.5f, 0.5f, 2.5f))));
-        constructors.put("sphere", new GameObject.Constructor(model, "sphere", new btSphereShape(0.5f)));
-        constructors.put("box", new GameObject.Constructor(model, "box", new btBoxShape(new Vector3(0.5f, 0.5f, 0.5f))));
-        constructors.put("cone", new GameObject.Constructor(model, "cone", new btConeShape(0.5f, 2f)));
-        constructors.put("capsule", new GameObject.Constructor(model, "capsule", new btCapsuleShape(.5f, 1f)));
-        constructors.put("cylinder", new GameObject.Constructor(model, "cylinder", new btCylinderShape(new Vector3(.5f, 1f, .5f))));
-
+		constructors = new ArrayMap<String, GameObject.Constructor>(String.class, GameObject.Constructor.class);
+        constructors.put("ground", new GameObject.Constructor(model, "ground", new btBoxShape(new Vector3(2.5f, 0.5f, 2.5f)), 0f));
+        constructors.put("sphere", new GameObject.Constructor(model, "sphere", new btSphereShape(0.5f), 1f));
+        constructors.put("box", new GameObject.Constructor(model, "box", new btBoxShape(new Vector3(0.5f, 0.5f, 0.5f)), 1f));
+        constructors.put("cone", new GameObject.Constructor(model, "cone", new btConeShape(0.5f, 2f), 1f));
+        constructors.put("capsule", new GameObject.Constructor(model, "capsule", new btCapsuleShape(.5f, 1f), 1f));
+        constructors.put("cylinder", new GameObject.Constructor(model, "cylinder", new btCylinderShape(new Vector3(.5f, 1f, .5f)), 1f));
 		// Create Collision World
         collisionConfig = new btDefaultCollisionConfiguration();
         dispatcher = new btCollisionDispatcher(collisionConfig);
         broadphase = new btDbvtBroadphase();
-        collisionWorld = new btCollisionWorld(dispatcher, broadphase, collisionConfig);
+        constraintSolver = new btSequentialImpulseConstraintSolver();
+        dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, broadphase, constraintSolver, collisionConfig);
+        dynamicsWorld.setGravity(new Vector3(0, -10f, 0));
         contactListener = new MyContactListener();
 
         instances = new Array<GameObject>();
         GameObject object = constructors.get("ground").construct();
         instances.add(object);
-        collisionWorld.addCollisionObject(object.body, GROUND_FLAG, ALL_FLAG);
+        dynamicsWorld.addRigidBody(object.body);
+        object.body.setContactCallbackFlag(GROUND_FLAG);
+        object.body.setContactCallbackFilter(0);
+        object.body.setCollisionFlags(object.body.getCollisionFlags() | btCollisionObject.CollisionFlags.CF_KINEMATIC_OBJECT);
+        object.body.setActivationState(Collision.DISABLE_DEACTIVATION);
 	}
 
 
     public void spawn() {
-        GameObject obj = constructors.values[1+MathUtils.random(constructors.size-2)].construct();
-        obj.moving = true;
+        GameObject obj = constructors.values[1 + MathUtils.random(constructors.size - 2)].construct();
         obj.transform.setFromEulerAngles(MathUtils.random(360f), MathUtils.random(360f), MathUtils.random(360f));
         obj.transform.trn(MathUtils.random(-2.5f, 2.5f), 9f, MathUtils.random(-2.5f, 2.5f));
-        obj.body.setWorldTransform(obj.transform);
+        obj.body.proceedToTransform(obj.transform);
         obj.body.setUserValue(instances.size);
-		// we also inform Bullet that we want to receive collision events for this object by adding the CF_CUSTOM_MATERIAL_CALLBACK flag. This flag is required for the onContactAdded method to be called.
         obj.body.setCollisionFlags(obj.body.getCollisionFlags() | btCollisionObject.CollisionFlags.CF_CUSTOM_MATERIAL_CALLBACK);
         instances.add(obj);
-        collisionWorld.addCollisionObject(obj.body, OBJECT_FLAG, GROUND_FLAG);
+        dynamicsWorld.addRigidBody(obj.body);
+        obj.body.setContactCallbackFlag(OBJECT_FLAG);
+        obj.body.setContactCallbackFilter(GROUND_FLAG);
     }
 
 	@Override
 	public void render(float delta) {
 		delta = Math.min(1f/30f, Gdx.graphics.getDeltaTime());
-        for (GameObject obj : instances) {
-            if (obj.moving) {
-                obj.transform.trn(0f, -delta, 0f);
-                obj.body.setWorldTransform(obj.transform);
-            }
-        }
 
-        collisionWorld.performDiscreteCollisionDetection();
+        angle = (angle + delta * speed) % 360f;
+        instances.get(0).transform.setTranslation(0, MathUtils.sinDeg(angle) * 2.5f, 0f);
+
+        dynamicsWorld.stepSimulation(delta, 5, 1f/60f);
 
         if ((spawnTimer -= delta) < 0) {
             spawn();
             spawnTimer = 1.5f;
-        }
-
-        for (GameObject obj : instances) {
-            if (obj.moving) {
-                obj.transform.trn(0f, -delta, 0f);
-                obj.body.setWorldTransform(obj.transform);
-            }
         }
 
         camController.update();
@@ -240,6 +275,9 @@ public class BulletTuto implements Screen {
 
 		collisionWorld.dispose();
 		broadphase.dispose();
+
+        dynamicsWorld.dispose();
+        constraintSolver.dispose();
 	}
     @Override public void pause () {}
     @Override public void resume () {}
@@ -248,4 +286,6 @@ public class BulletTuto implements Screen {
 	@Override
 	public void resize(int width, int height) {
 	}
+
+
 }
