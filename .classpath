@@ -8,26 +8,31 @@
 	<classpathentry kind="src" path="ios/src"/>
 
 	<!-- CORE -->
-	<classpathentry exported="true" kind="lib" path="/home2/tourneboeuf/.gradle/caches/modules-2/files-2.1/com.badlogicgames.gdx/gdx/1.9.0/a064f06e8692c8f7084cd0100529ed8285413ff5/gdx-1.9.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="/home2/tourneboeuf/.gradle/caches/modules-2/files-2.1/com.badlogicgames.gdx/gdx-freetype/1.9.0/b03693d840ea49eac2e0ec5c2f61b9e91207ddc3/gdx-freetype-1.9.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="/home2/tourneboeuf/Software/Java/Libgdx/Jar/Git/gdx/target/classes"/>
 
-	<!-- BOX2D -->
-	<classpathentry exported="true" kind="lib" path="/home2/tourneboeuf/.gradle/caches/modules-2/files-2.1/com.badlogicgames.gdx/gdx-box2d/1.9.6-SNAPSHOT/1bd2ad12bffec848f7116a827028ccf06a21efe8/gdx-box2d-1.9.6-SNAPSHOT-sources.jar"/>
+
+
+
+
+
+
+
 
 	<!-- ANDROID SDK -->
 	<classpathentry exported="true" kind="lib" path="/home2/tourneboeuf/Software/Android/SDK/android-sdk-linux/platforms/android-22/android.jar"/>
 
-	<!-- BACKENDS -->
-	<classpathentry exported="true" kind="lib" path="/home2/tourneboeuf/.gradle/caches/modules-2/files-2.1/com.badlogicgames.gdx/gdx-backend-android/1.5.5/16bbdb750c6e557693820bbcd31dd992c0f6839f/gdx-backend-android-1.5.5.jar"/>
-	<classpathentry exported="true" kind="lib" path="/home2/tourneboeuf/.gradle/caches/modules-2/files-2.1/com.badlogicgames.gdx/gdx-backend-lwjgl/1.5.5/3839f73b56e77e2d06cb874952dff466756e1e25/gdx-backend-lwjgl-1.5.5.jar"/>
-	<classpathentry exported="true" kind="lib" path="/home2/tourneboeuf/.gradle/caches/modules-2/files-2.1/com.badlogicgames.gdx/gdx-backend-gwt/1.5.5/30566300f1d4c4fb5b5af993f05e9fd7fa73934/gdx-backend-gwt-1.5.5.jar"/>
-	<classpathentry exported="true" kind="lib" path="/home2/tourneboeuf/.gradle/caches/modules-2/files-2.1/com.badlogicgames.gdx/gdx-backend-gwt/1.5.5/4fa3c812d8bc74d063e3f3b390bc0fe28c345e80/gdx-backend-gwt-1.5.5-sources.jar"/>
+	<!-- BACKENDS android, lwgjl, gwt-->
+	<classpathentry exported="true" kind="lib" path="/home2/tourneboeuf/Software/Java/Libgdx/Jar/Git/backends/gdx-backend-android/build/classes/main"/>
+	<classpathentry exported="true" kind="lib" path="/home2/tourneboeuf/Software/Java/Libgdx/Jar/Git/backends/gdx-backend-lwjgl/build/classes"/>
+	<classpathentry exported="true" kind="lib" path="/home2/tourneboeuf/Software/Java/Libgdx/Jar/Git/backends/gdx-backends-gwt/build/classes"/>
 
+
+	<!-- BOX2D -->
+	<classpathentry exported="true" kind="lib" path="/home2/tourneboeuf/Software/Java/Libgdx/Jar/Git/extensions/gdx-box2d/gdx-box2d/build/classes/main"/>
 	<!-- CRYPTO -->
 	<classpathentry exported="true" kind="lib" path="/home2/tourneboeuf/Software/Java/Jar/gwt-crypto-2.3.0.jar"/>
-
 	<!-- BULLET -->
-	<classpathentry exported="true" kind="lib" path="/home2/tourneboeuf/.gradle/caches/modules-2/files-2.1/com.badlogicgames.gdx/gdx-bullet/1.9.0/cf3f2fad3ea557f8d5aae924cc74f86cd7c10367/gdx-bullet-1.9.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="/home2/tourneboeuf/.m2/repository/com/badlogicgames/gdx/gdx-bullet/1.9.7-SNAPSHOT/gdx-bullet-1.9.7-SNAPSHOT-sources.jar"/>
 
 	<!-- GRADLE -->
 	<classpathentry exported="true" kind="lib" path="gradle/wrapper/gradle-wrapper.jar"/>
