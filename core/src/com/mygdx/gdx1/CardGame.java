@@ -3,17 +3,25 @@ package com.mygdx.gdx1;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
+import com.badlogic.gdx.graphics.VertexAttribute;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.g3d.Material;
+import com.badlogic.gdx.graphics.g3d.ModelBatch;
+import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
+import com.badlogic.gdx.graphics.g3d.attributes.FloatAttribute;
+import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.ObjectSet;
 
 public class CardGame implements Screen {
-    SpriteBatch spriteBatch;
+    ModelBatch modelBatch;
     TextureAtlas atlas;
     Sprite front;
     Sprite back;
@@ -44,38 +52,52 @@ public class CardGame implements Screen {
         }
     }
 
-    public static class Card {
+    public static class Card extends Renderable{
         public final Suit suit;
         public final Pip pip;
 
-        private final Sprite front;
-        private final Sprite back;
-
-        private boolean turned;
-
         public Card(Suit suit, Pip pip, Sprite back, Sprite front) {
-            back.setSize(CARD_WIDTH, CARD_HEIGHT);
-            front.setSize(CARD_WIDTH, CARD_HEIGHT);
+            assert(front.getTexture() == back.getTexture());
             this.suit = suit;
             this.pip = pip;
-            this.back = back;
-            this.front = front;
+
+            material = new Material(
+                    TextureAttribute.createDiffuse(front.getTexture()),
+                    new BlendingAttribute(false, 1f),
+                    FloatAttribute.createAlphaTest(0.5f)
+                );
+
+            front.setSize(CARD_WIDTH, CARD_HEIGHT);
+            back.setSize(CARD_WIDTH, CARD_HEIGHT);
+
+            front.setPosition(-front.getWidth() * 0.5f, -front.getHeight() * 0.5f);
+            back.setPosition(-back.getWidth() * 0.5f, -back.getHeight() * 0.5f);
+
+            float[] vertices = convert(front.getVertices(), back.getVertices());
+            short[] indices = new short[] {0, 1, 2, 2, 3, 0, 4, 5, 6, 6, 7, 4 };
+
+            // FIXME: this Mesh needs to be disposed
+            meshPart.mesh = new Mesh(true, 8, 12, VertexAttribute.Position(), VertexAttribute.Normal(), VertexAttribute.TexCoords(0));
+            meshPart.mesh.setVertices(vertices);
+            meshPart.mesh.setIndices(indices);
+            meshPart.offset = 0;
+            meshPart.size = meshPart.mesh.getNumIndices();
+            meshPart.primitiveType = GL20.GL_TRIANGLES;
+            meshPart.update();
         }
 
-        public void setPosition(float x, float y) {
-            front.setPosition(x - 0.5f * front.getWidth(), y - 0.5f * front.getHeight());
-            back.setPosition(x - 0.5f * back.getWidth(), y - 0.5f * back.getHeight());
-        }
+        private static float[] convert(float[] front, float[] back) {
+            return new float[] {
+                front[Batch.X2], front[Batch.Y2], 0, 0, 0, 1, front[Batch.U2], front[Batch.V2],
+                front[Batch.X1], front[Batch.Y1], 0, 0, 0, 1, front[Batch.U1], front[Batch.V1],
+                front[Batch.X4], front[Batch.Y4], 0, 0, 0, 1, front[Batch.U4], front[Batch.V4],
+                front[Batch.X3], front[Batch.Y3], 0, 0, 0, 1, front[Batch.U3], front[Batch.V3],
 
-        public void turn() {
-            turned = !turned;
-        }
-
-        public void draw(Batch batch) {
-            if (turned)
-                back.draw(batch);
-            else
-                front.draw(batch);
+                back[Batch.X1], back[Batch.Y1], 0, 0, 0, -1, back[Batch.U1], back[Batch.V1],
+                back[Batch.X2], back[Batch.Y2], 0, 0, 0, -1, back[Batch.U2], back[Batch.V2],
+                back[Batch.X3], back[Batch.Y3], 0, 0, 0, -1, back[Batch.U3], back[Batch.V3],
+                back[Batch.X4], back[Batch.Y4], 0, 0, 0, -1, back[Batch.U4], back[Batch.V4]
+            };
         }
     }
 
@@ -101,26 +123,25 @@ public class CardGame implements Screen {
 
     @Override
     public void show() {
-        spriteBatch = new SpriteBatch();
-        atlas = new TextureAtlas("card/carddeck.atlas");
+        modelBatch = new ModelBatch();
 
+        atlas = new TextureAtlas("card/carddeck.atlas");
         cards = new ObjectSet<Card>();
+
         deck = new CardDeck(atlas, 3);
 
         Card card1 = deck.getCard(Suit.Diamonds, Pip.Queen);
-        card1.setPosition(-1, 0);
+        card1.worldTransform.translate(-1, 0, 0);
         cards.add(card1);
 
         Card card2 = deck.getCard(Suit.Hearts, Pip.Four);
-        card2.setPosition(0, 0);
+        card2.worldTransform.translate(0, 0, 0);
         cards.add(card2);
 
         Card card3 = deck.getCard(Suit.Spades, Pip.Ace);
-        card3.setPosition(1, 0);
-        card3.turn();
+        card3.worldTransform.translate(1, 0, 0);
         cards.add(card3);
 
-        // Camera
         cam = new PerspectiveCamera();
         cam.position.set(0, 0, 10);
         cam.lookAt(0, 0, 0);
@@ -132,16 +153,19 @@ public class CardGame implements Screen {
     public void render(float delta) {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
-        spriteBatch.setProjectionMatrix(cam.combined);
-        spriteBatch.begin();
+        camController.update();
+
+        cards.first().worldTransform.rotate(Vector3.Y, 90 * delta);
+
+        modelBatch.begin(cam);
         for (Card card : cards)
-            card.draw(spriteBatch);
-        spriteBatch.end();
+            modelBatch.render(card);
+        modelBatch.end();
     }
 
     @Override
     public void dispose() {
-        spriteBatch.dispose();
+        modelBatch.dispose();
         atlas.dispose();
     }
 
