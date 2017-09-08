@@ -9,30 +9,27 @@
 
 	<!-- CORE -->
 	<classpathentry exported="true" kind="lib" path="/home2/tourneboeuf/Software/Java/Libgdx/Jar/Git/gdx/target/classes"/>
-
-
-
-
-
-
-
-
-
 	<!-- ANDROID SDK -->
 	<classpathentry exported="true" kind="lib" path="/home2/tourneboeuf/Software/Android/SDK/android-sdk-linux/platforms/android-22/android.jar"/>
 
-	<!-- BACKENDS android, lwgjl, gwt-->
+
+	<!-- BACKENDS --> 
+	<!-- android --> 
 	<classpathentry exported="true" kind="lib" path="/home2/tourneboeuf/Software/Java/Libgdx/Jar/Git/backends/gdx-backend-android/build/classes/main"/>
+	<!-- lwgjl --> 
 	<classpathentry exported="true" kind="lib" path="/home2/tourneboeuf/Software/Java/Libgdx/Jar/Git/backends/gdx-backend-lwjgl/build/classes"/>
+	<!-- gwt -->
 	<classpathentry exported="true" kind="lib" path="/home2/tourneboeuf/Software/Java/Libgdx/Jar/Git/backends/gdx-backends-gwt/build/classes"/>
 
 
-	<!-- BOX2D -->
+	<!-- EXTESIONS -->
+	<!-- box2d -->
 	<classpathentry exported="true" kind="lib" path="/home2/tourneboeuf/Software/Java/Libgdx/Jar/Git/extensions/gdx-box2d/gdx-box2d/build/classes/main"/>
-	<!-- CRYPTO -->
+	<!-- crypto -->
 	<classpathentry exported="true" kind="lib" path="/home2/tourneboeuf/Software/Java/Jar/gwt-crypto-2.3.0.jar"/>
-	<!-- BULLET -->
+	<!-- bullet -->
 	<classpathentry exported="true" kind="lib" path="/home2/tourneboeuf/.m2/repository/com/badlogicgames/gdx/gdx-bullet/1.9.7-SNAPSHOT/gdx-bullet-1.9.7-SNAPSHOT-sources.jar"/>
+
 
 	<!-- GRADLE -->
 	<classpathentry exported="true" kind="lib" path="gradle/wrapper/gradle-wrapper.jar"/>
