@@ -3,12 +3,13 @@ package com.mygdx.gdx1;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.ObjectSet;
 
 public class CardGame implements Screen {
@@ -19,7 +20,7 @@ public class CardGame implements Screen {
     public final static float CARD_WIDTH = 1f;
     public final static float CARD_HEIGHT = CARD_WIDTH * 277f / 200f;
     public final static float MINIMUM_VIEWPORT_SIZE = 5f;
-    OrthographicCamera cam;
+    PerspectiveCamera cam;
     CardDeck deck;
     ObjectSet<Card> cards;
     private CameraInputController camController;
@@ -120,7 +121,7 @@ public class CardGame implements Screen {
         cards.add(card3);
 
         // Camera
-        cam = new OrthographicCamera();
+        cam = new PerspectiveCamera();
         cam.position.set(0, 0, 10);
         cam.lookAt(0, 0, 0);
         camController = new CameraInputController(cam);
@@ -152,13 +153,16 @@ public class CardGame implements Screen {
 
     @Override
     public void resize(int width, int height) {
-        if (width > height) {
-            cam.viewportHeight = MINIMUM_VIEWPORT_SIZE;
-            cam.viewportWidth = cam.viewportHeight * (float)width / (float)height;
-        } else {
-            cam.viewportWidth = MINIMUM_VIEWPORT_SIZE;
-            cam.viewportHeight = cam.viewportWidth * (float)height / (float)width;
-        }
+        float halfHeight = MINIMUM_VIEWPORT_SIZE * 0.5f;
+        if (height > width)
+            halfHeight *= (float)height / (float)width;
+        float halfFovRadians = MathUtils.degreesToRadians * cam.fieldOfView * 0.5f;
+        float distance = halfHeight / (float)Math.tan(halfFovRadians);
+
+        cam.viewportWidth = width;
+        cam.viewportHeight = height;
+        cam.position.set(0, 0, distance);
+        cam.lookAt(0, 0, 0);
         cam.update();
     }
 
