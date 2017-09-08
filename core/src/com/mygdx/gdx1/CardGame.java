@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
 import com.badlogic.gdx.utils.ObjectSet;
 
 public class CardGame implements Screen {
@@ -18,10 +19,10 @@ public class CardGame implements Screen {
     public final static float CARD_WIDTH = 1f;
     public final static float CARD_HEIGHT = CARD_WIDTH * 277f / 200f;
     public final static float MINIMUM_VIEWPORT_SIZE = 5f;
-	OrthographicCamera cam;
+    OrthographicCamera cam;
     CardDeck deck;
     ObjectSet<Card> cards;
-
+    private CameraInputController camController;
 
     public enum Suit {
         Clubs("clubs", 0), Diamonds("diamonds", 1), Hearts("hearts", 2), Spades("spades", 3);
@@ -101,7 +102,6 @@ public class CardGame implements Screen {
     public void show() {
         spriteBatch = new SpriteBatch();
         atlas = new TextureAtlas("card/carddeck.atlas");
-		cam = new OrthographicCamera();
 
         cards = new ObjectSet<Card>();
         deck = new CardDeck(atlas, 3);
@@ -118,6 +118,13 @@ public class CardGame implements Screen {
         card3.setPosition(1, 0);
         card3.turn();
         cards.add(card3);
+
+        // Camera
+        cam = new OrthographicCamera();
+        cam.position.set(0, 0, 10);
+        cam.lookAt(0, 0, 0);
+        camController = new CameraInputController(cam);
+        Gdx.input.setInputProcessor(camController);
     }
 
     @Override
@@ -135,16 +142,16 @@ public class CardGame implements Screen {
     public void dispose() {
         spriteBatch.dispose();
         atlas.dispose();
-	}
+    }
 
-	@Override
-	public void hide() { }
+    @Override
+    public void hide() { }
 
-	@Override
-	public void pause() { }
+    @Override
+    public void pause() { }
 
-	@Override
-	public void resize(int width, int height) {
+    @Override
+    public void resize(int width, int height) {
         if (width > height) {
             cam.viewportHeight = MINIMUM_VIEWPORT_SIZE;
             cam.viewportWidth = cam.viewportHeight * (float)width / (float)height;
@@ -153,8 +160,8 @@ public class CardGame implements Screen {
             cam.viewportHeight = cam.viewportWidth * (float)height / (float)width;
         }
         cam.update();
-	}
+    }
 
-	@Override
-	public void resume() { }
+    @Override
+    public void resume() { }
 }
