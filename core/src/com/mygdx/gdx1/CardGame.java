@@ -2,23 +2,36 @@ package com.mygdx.gdx1;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.VertexAttribute;
+import com.badlogic.gdx.graphics.VertexAttributes.Usage;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.Material;
+import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
+import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.FloatAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
+import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
+import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
+import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.ObjectSet;
+import com.badlogic.gdx.utils.Pool;
 
 public class CardGame implements Screen {
     ModelBatch modelBatch;
@@ -30,8 +43,11 @@ public class CardGame implements Screen {
     public final static float MINIMUM_VIEWPORT_SIZE = 5f;
     PerspectiveCamera cam;
     CardDeck deck;
-    ObjectSet<Card> cards;
+    CardBatch cards;
     private CameraInputController camController;
+    Model tableTopModel;
+    ModelInstance tableTop;
+    Environment environment;
 
     public enum Suit {
         Clubs("clubs", 0), Diamonds("diamonds", 1), Hearts("hearts", 2), Spades("spades", 3);
@@ -52,38 +68,26 @@ public class CardGame implements Screen {
         }
     }
 
-    public static class Card extends Renderable{
+    public static class Card {
         public final Suit suit;
         public final Pip pip;
+
+        public final float[] vertices;
+        public final short[] indices;
+
+        public final Matrix4 transform = new Matrix4();
 
         public Card(Suit suit, Pip pip, Sprite back, Sprite front) {
             assert(front.getTexture() == back.getTexture());
             this.suit = suit;
             this.pip = pip;
-
-            material = new Material(
-                    TextureAttribute.createDiffuse(front.getTexture()),
-                    new BlendingAttribute(false, 1f),
-                    FloatAttribute.createAlphaTest(0.5f)
-                );
-
             front.setSize(CARD_WIDTH, CARD_HEIGHT);
             back.setSize(CARD_WIDTH, CARD_HEIGHT);
-
             front.setPosition(-front.getWidth() * 0.5f, -front.getHeight() * 0.5f);
             back.setPosition(-back.getWidth() * 0.5f, -back.getHeight() * 0.5f);
 
-            float[] vertices = convert(front.getVertices(), back.getVertices());
-            short[] indices = new short[] {0, 1, 2, 2, 3, 0, 4, 5, 6, 6, 7, 4 };
-
-            // FIXME: this Mesh needs to be disposed
-            meshPart.mesh = new Mesh(true, 8, 12, VertexAttribute.Position(), VertexAttribute.Normal(), VertexAttribute.TexCoords(0));
-            meshPart.mesh.setVertices(vertices);
-            meshPart.mesh.setIndices(indices);
-            meshPart.offset = 0;
-            meshPart.size = meshPart.mesh.getNumIndices();
-            meshPart.primitiveType = GL20.GL_TRIANGLES;
-            meshPart.update();
+            vertices = convert(front.getVertices(), back.getVertices());
+            indices = new short[] {0, 1, 2, 2, 3, 0, 4, 5, 6, 6, 7, 4 };
         }
 
         private static float[] convert(float[] front, float[] back) {
@@ -121,32 +125,87 @@ public class CardGame implements Screen {
         }
     }
 
+    public static class CardBatch extends ObjectSet<Card> implements RenderableProvider, Disposable{
+        Renderable renderable;
+        Mesh mesh;
+        MeshBuilder meshBuilder;
+
+        public CardBatch(Material material) {
+            final int maxNumberOfCards = 52;
+            final int maxNumberOfVertices = maxNumberOfCards * 8;
+            final int maxNumberOfIndices = maxNumberOfCards * 12;
+            mesh = new Mesh(false, maxNumberOfVertices, maxNumberOfIndices,
+                    VertexAttribute.Position(), VertexAttribute.Normal(), VertexAttribute.TexCoords(0));
+            meshBuilder = new MeshBuilder();
+
+            renderable = new Renderable();
+            renderable.material = material;
+        }
+
+        @Override
+        public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool) {
+            meshBuilder.begin(mesh.getVertexAttributes());
+            meshBuilder.part("cards", GL20.GL_TRIANGLES, renderable.meshPart);
+            for (Card card : this) {
+                meshBuilder.setVertexTransform(card.transform);
+                meshBuilder.addMesh(card.vertices, card.indices);
+            }
+            meshBuilder.end(mesh);
+
+            renderables.add(renderable);
+        }
+
+        @Override
+        public void dispose() {
+            mesh.dispose();
+        }
+    }
+
     @Override
     public void show() {
         modelBatch = new ModelBatch();
-
         atlas = new TextureAtlas("card/carddeck.atlas");
-        cards = new ObjectSet<Card>();
-
+        Material material = new Material(
+                TextureAttribute.createDiffuse(atlas.getTextures().first()),
+                new BlendingAttribute(false, 1f),
+                FloatAttribute.createAlphaTest(0.5f));
+        cards = new CardBatch(material);
         deck = new CardDeck(atlas, 3);
 
-        Card card1 = deck.getCard(Suit.Diamonds, Pip.Queen);
-        card1.worldTransform.translate(-1, 0, 0);
-        cards.add(card1);
-
-        Card card2 = deck.getCard(Suit.Hearts, Pip.Four);
-        card2.worldTransform.translate(0, 0, 0);
-        cards.add(card2);
-
-        Card card3 = deck.getCard(Suit.Spades, Pip.Ace);
-        card3.worldTransform.translate(1, 0, 0);
-        cards.add(card3);
+        // CARDS
+		deck = new CardDeck(atlas, 3);
+		
+		Card card1 = deck.getCard(Suit.Diamonds, Pip.Queen);
+		card1.transform.translate(-1, 0, 0);
+		cards.add(card1);
+		
+		Card card2 = deck.getCard(Suit.Hearts, Pip.Seven);
+		card2.transform.translate(0, 0, 0);
+		cards.add(card2);
+		
+		Card card3 = deck.getCard(Suit.Spades, Pip.Ace);
+		card3.transform.translate(1, 0, 0);
+cards.add(card3);
 
         cam = new PerspectiveCamera();
         cam.position.set(0, 0, 10);
         cam.lookAt(0, 0, 0);
         camController = new CameraInputController(cam);
         Gdx.input.setInputProcessor(camController);
+
+        // TABLE
+        ModelBuilder builder = new ModelBuilder();
+        builder.begin();
+        builder.node().id = "top";
+        builder.part("top", GL20.GL_TRIANGLES, Usage.Position | Usage.Normal,
+                new Material(ColorAttribute.createDiffuse(new Color(0x63750A))))
+            .box(0f, 0f, -0.5f, 20f, 20f, 1f);
+        tableTopModel = builder.end();
+        tableTop = new ModelInstance(tableTopModel);
+
+        environment = new Environment();
+        environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1.f));
+        environment.add(new DirectionalLight().set(0.8f, 0.8f, 0.8f, -.4f, -.4f, -.4f));
     }
 
     @Override
@@ -155,11 +214,11 @@ public class CardGame implements Screen {
 
         camController.update();
 
-        cards.first().worldTransform.rotate(Vector3.Y, 90 * delta);
+        // cards.first().worldTransform.rotate(Vector3.Y, 90 * delta);
 
         modelBatch.begin(cam);
-        for (Card card : cards)
-            modelBatch.render(card);
+        modelBatch.render(tableTop, environment);
+        modelBatch.render(cards, environment);
         modelBatch.end();
     }
 
@@ -167,6 +226,8 @@ public class CardGame implements Screen {
     public void dispose() {
         modelBatch.dispose();
         atlas.dispose();
+        cards.dispose();
+        tableTopModel.dispose();
     }
 
     @Override
